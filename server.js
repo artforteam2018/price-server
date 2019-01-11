@@ -45,7 +45,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/ping', (req, res) => {
-  res.send('ok');
+  res.send('pong');
 });
 
 app.get('/getDialogs', (req, res) => {
