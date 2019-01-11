@@ -7,15 +7,15 @@ const scrypt = require('scrypt');
 const crypto = require("crypto");
 const sha512 = require("js-sha512")
 const sol = 'z7qlO?cncUIurNn}BaA}nrPoW5D6r~s9JHIyPoYblVS$qe~%~ZmT?HC7{3%pm43f' +
-            'Ajkm02eLPog6F~|RAARKIMzT8DR@Yly~ePHHuSmFDy?t1lE64fWm1%~SJGYHQw6C' +
-            '8}R?hCR2SJMnOF4iQrQo0CYlg$iX$GoHRmOLW09eO0C~O6wVeyyz5QjlZi5$id$?' +
-            'i$3SFMK7E42jNWjkLNYuR5IZC?QRSOL@gbwuOX$n#nl2FPZzAS0@~pq6wU|JlK6l' +
-            '5r5%XsVIwfubcN1qLo~Dbo*tZpXuKN|HFoy4BWiStRgkAziw|66|v7e~OOiF@p|E' +
-            'saU6Cm*Ad5RNZK#{SSdLN@aF7Td{Ma@xVI}Fzhn7~??x$D~54@DvPr9nxhmA~d7O' +
-            '22w4cxGo3zIdVicD*n%HJL~K1poI0lzRk}l{8T~W|Do9hSyt31mziqTa${e7Y#Dr' +
-            '*tt6@Pm%qYL93It~ZnLBVeKtZPTlMGFOqgwLVnqwsDk0zAQEi*PNE8$3OcNlGfw~' +
-            'eniuAX4BNM5D0JgrepD#XJ$Gy}j27OPldUj4jrZ4a6s?|?1VHZJdNWoKCEgqFFNf' +
-            '3X#1NLcA{@}6W6##pV62H~~%aWqxoNG9I7Lkcuw*|71ww|w@AhyzhRiCsFk|i{0n';
+    'Ajkm02eLPog6F~|RAARKIMzT8DR@Yly~ePHHuSmFDy?t1lE64fWm1%~SJGYHQw6C' +
+    '8}R?hCR2SJMnOF4iQrQo0CYlg$iX$GoHRmOLW09eO0C~O6wVeyyz5QjlZi5$id$?' +
+    'i$3SFMK7E42jNWjkLNYuR5IZC?QRSOL@gbwuOX$n#nl2FPZzAS0@~pq6wU|JlK6l' +
+    '5r5%XsVIwfubcN1qLo~Dbo*tZpXuKN|HFoy4BWiStRgkAziw|66|v7e~OOiF@p|E' +
+    'saU6Cm*Ad5RNZK#{SSdLN@aF7Td{Ma@xVI}Fzhn7~??x$D~54@DvPr9nxhmA~d7O' +
+    '22w4cxGo3zIdVicD*n%HJL~K1poI0lzRk}l{8T~W|Do9hSyt31mziqTa${e7Y#Dr' +
+    '*tt6@Pm%qYL93It~ZnLBVeKtZPTlMGFOqgwLVnqwsDk0zAQEi*PNE8$3OcNlGfw~' +
+    'eniuAX4BNM5D0JgrepD#XJ$Gy}j27OPldUj4jrZ4a6s?|?1VHZJdNWoKCEgqFFNf' +
+    '3X#1NLcA{@}6W6##pV62H~~%aWqxoNG9I7Lkcuw*|71ww|w@AhyzhRiCsFk|i{0n';
 
 
 const clientPg = new Client({
