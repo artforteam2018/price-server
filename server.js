@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const app = express();
@@ -42,6 +42,10 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => {
   checkToken(req)
       .then(result => res.send(result))
+});
+
+app.get('/ping', (req, res) => {
+  res.send('ok');
 });
 
 app.get('/getDialogs', (req, res) => {
@@ -262,7 +266,7 @@ io.on('connection', client => {
   })
 });
 
-server.listen(8000);
+server.listen(3535);
 
 function updateChat(data) {
   let query;
