@@ -309,6 +309,30 @@ function updateChat(data) {
       .catch(e => console.log(e))
 }
 
+function loadConvertRules() {
+
+    let query = {
+        text: `SELECT *
+               FROM convert_rules`
+    }
+
+    clientPg.query(query)
+        .then(res => {
+            res.rows.forEach(row => {
+                let querySessions = {
+                    text: 'SELECT token FROM sessions WHERE username = $1 OR username = $2',
+                    values: [row.username, row.user2]
+                };
+                clientPg.query(querySessions)
+                    .then(res => res.rows.forEach(session => {
+                        io.to(session.token).emit('newMessage', {text: row.text, date: row.date, user: row.username, user2: row.user2});
+                    }));
+
+            })
+        })
+        .catch(e => console.log(e))
+}
+
 function checkToken(req) {
   return new Promise(resolve => {
     if (req.headers['token'] !== undefined && req.headers['username'] !== undefined) {
