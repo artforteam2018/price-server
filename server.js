@@ -31,7 +31,7 @@ let imapCounter = 0;
 
 
 
-oldBack.main();
+//oldBack.main();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
@@ -50,57 +50,6 @@ app.get('/', (req, res) => {
 
 app.get('/ping', (req, res) => {
   res.send('pong');
-});
-
-app.get('/getDialogs', (req, res) => {
-  checkToken(req)
-      .then(result => {
-        if (result.success) {
-          let queryGetDialogs = {
-            text: `SELECT t2.date, t2.user2, chat_history.text
-                           FROM (SELECT MAX(date) AS date, user2, MAX(uuid) AS uuid
-                                 FROM (
-                                        SELECT MAX(username) AS user2,
-                                               MAX(date)     AS date,
-                                               uuid
-                                        FROM chat_history
-                                        WHERE user2 = $1
-                                        GROUP BY uuid
-                                        UNION
-                                        SELECT MAX(user2) AS user2,
-                                               MAX(date)  AS date,
-                                               uuid
-                                        FROM chat_history
-                                        WHERE username = $1
-                                        GROUP BY uuid) AS t1
-                                 GROUP BY user2) AS t2
-                                  JOIN chat_history ON t2.uuid = chat_history.uuid AND t2.date = chat_history.date
-
-                    `,
-            values: [req.headers['username']]
-          };
-          clientPg.query(queryGetDialogs)
-              .then(result => {
-                res.send({success: true, rows: result.rows})
-              })
-        }
-      })
-});
-
-app.post('/searchUser', (req, res) => {
-  checkToken(req)
-      .then(result => {
-        if (result.success) {
-          let queryGetDialogs = {
-            text: `Select username from users WHERE username = $1`,
-            values: [req.body.user]
-          };
-          clientPg.query(queryGetDialogs)
-              .then(result => {
-                res.send({success: true, data: result.rows})
-              })
-        }
-      })
 });
 
 app.post('/auth', (req, res) => {
@@ -366,6 +315,9 @@ function checkToken(req) {
                 resolve({success: true, type: 200})
               }
             }
+          }, err => {
+              resolve({success: false, type: 426})
+              console.log(err)
           })
     }
   });

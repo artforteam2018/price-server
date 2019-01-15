@@ -102,6 +102,7 @@ async function main() {
                         sender,
                         outer_name,
                         filter,
+                        in_use,
                         t.filters     AS filters,
                         t.formulas    AS formulas,
                         t.unions      AS unions,
@@ -113,13 +114,13 @@ async function main() {
                         LEFT JOIN update_price_log AS upl on convert_rules.id = upl.convert_rule
                         LEFT JOIN templates t on convert_rules.template = t.id
                         LEFT JOIN headers h on convert_rules.headers = h.id
-                 GROUP BY convert_rules.id, title_filter, outer_name, filter, sender, template, source, t.filters, h.columns,
+                 GROUP BY convert_rules.id, title_filter, in_use, outer_name, filter, sender, template, source, t.filters, h.columns,
                    t.formulas, t.unions
                  ORDER BY convert_rules.id
     `;
 
     let template = await convertDBQueryToArray(query);
-    await mailListen(template);
+    //await mailListen(template);
     //await gmMakeRequest(template);
 
     template = await convertDBQueryToArray(query);
@@ -256,7 +257,8 @@ async function makePrices(template) {
         console.log("Запись прайсов...");
         for (let i = 1; i < template.length; i++) {
 
-            if (template[i].source !== null) {
+            /** @namespace template.in_use */
+            if (template[i].source.length > 0 && template[i].in_use) {
 
                 let main_file = '';
 
@@ -341,19 +343,59 @@ function convertXlsxToArray(path) {
 function buildXlsx(newExcel, resultName) {
     return new Promise(async resolve => {
 
-        xlsx.buildAsync([{
-            name: "price",
-            data: newExcel
-        }], {}, function (error, xlsBuffer) {
-            if (!error) {
-                fs.writeFileSync(fs.realpathSync('./ready') + '/' + resultName + '.xlsx', xlsBuffer);
-                console.log('Прайс ' + resultName + ' записан');
-                resolve()
-            } else {
-                console.log('Ошибка записи ' + error);
-                resolve()
+        if (resultName === 'УАЗ ЦС') {
+            let text = `truncate table uaz1_add0;
+            INSERT INTO uaz1_add0 VALUES`;
+            for (let i = 0; i < newExcel.length; i++) {
+                text += '(';
+                for (let j = 0; j < newExcel[i].length; j++) {
+                    if (newExcel[i][j] === undefined || newExcel[i][j] === null) {
+                        text += '' + null + ','
+                    } else if (typeof newExcel[i][j] === 'object') {
+                        text += '\'' + newExcel[i][j].v + '\','
+                    } else if (typeof newExcel[i][j] === 'string') {
+                        text += '\'' + newExcel[i][j] + '\','
+                    } else {
+                         text += '' + newExcel[i][j] + ','
+                    }
+                }
+                text = text.substring(0, text.length-1) + '),';
             }
-        })
+            text = text.substring(0, text.length-1) + ';';
+            console.log(text)
+
+            clientPg.query(text)
+                .then(()=> {
+                    xlsx.buildAsync([{
+                        name: "price",
+                        data: newExcel
+                    }], {}, function (error, xlsBuffer) {
+                        if (!error) {
+                            fs.writeFileSync(fs.realpathSync('./ready') + '/' + resultName + '.xlsx', xlsBuffer);
+                            console.log('Прайс ' + resultName + ' записан');
+                            resolve()
+                        } else {
+                            console.log('Ошибка записи ' + error);
+                            resolve()
+                        }
+                    })
+                })
+        } else {
+
+            xlsx.buildAsync([{
+                name: "price",
+                data: newExcel
+            }], {}, function (error, xlsBuffer) {
+                if (!error) {
+                    fs.writeFileSync(fs.realpathSync('./ready') + '/' + resultName + '.xlsx', xlsBuffer);
+                    console.log('Прайс ' + resultName + ' записан');
+                    resolve()
+                } else {
+                    console.log('Ошибка записи ' + error);
+                    resolve()
+                }
+            })
+        }
     })
 }
 
@@ -552,9 +594,7 @@ async function modifyExcel(parsedObject, template, arrayOfTables, resultName) {
             }
 
             let newExcel = [];
-            //newExcel.push(parsedObjectTemplate[0].data[templateStr.rescol]);
             //parsing and use formulas
-            let count = 0;
 
             await Promise.all(parsedObject[0].data.map(async (oldElem) => {
 
@@ -577,10 +617,15 @@ async function modifyExcel(parsedObject, template, arrayOfTables, resultName) {
 
                         //тут мы преобразовываем формулу в js. самое сложное
                         let formula = await makeFormula(('' + formule).substring(0, formule.length), oldElem);
+                        let ff = formula;
                         try {
+
                             formula = eval((formula.replace(/\r/g, '').replace(/\n/g, '')));
                         } catch (e) {
                             console.log(formula);
+                        }
+                        if (formula === 2/0){
+                            console.log(ff)
                         }
 
 
@@ -626,7 +671,7 @@ function makeFormula(str, elem) {
                 elemStr = elemStr.replace(/\(/g, ' ');
                 elemStr = elemStr.replace(/\)/g, ' ');
                 if (str.includes('elem[') && typeof elemStr === 'number' ||
-                    parseInt(elemStr.replace(/,/g, '.')) == parseInt(elemStr.replace(/,/g, '.')) && parseFloat(elemStr.replace(/,/g, '.')) == elemStr.replace(/,/g, '.')) {
+                    parseInt(parseFloat(elemStr.replace(/,/g, '.'))) == parseInt(elemStr.replace(/,/g, '.')) && parseFloat(elemStr.replace(/,/g, '.')) == elemStr.replace(/,/g, '.')) {
 
                     str = str.split('elem[' + k + ']').join(elemStr.replace(/,/g, '.'))
                 } else {

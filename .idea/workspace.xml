@@ -3,10 +3,18 @@
   <component name="ChangeListManager">
     <list default="true" id="477d5165-23ca-4b6e-9198-fbfdc4707214" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/attachments/EDIX.zip" beforeDir="false" afterPath="$PROJECT_DIR$/attachments/EDIX.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/attachments/HMCIS_Price_&amp;_Stock.XLSX" beforeDir="false" afterPath="$PROJECT_DIR$/attachments/HMCIS_Price_&amp;_Stock.XLSX" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/attachments/price.xls" beforeDir="false" afterPath="$PROJECT_DIR$/attachments/price.xls" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/attachments/УАЗ НАЛИЧИЕ.xls" beforeDir="false" afterPath="$PROJECT_DIR$/attachments/УАЗ НАЛИЧИЕ.xls" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/attachments/Шины зима 18-19 rev.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/attachments/Шины зима 18-19 rev.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/old-back.js" beforeDir="false" afterPath="$PROJECT_DIR$/old-back.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ready/CJD.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/ready/CJD.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ready/SUBARU.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/ready/SUBARU.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/temp.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/temp.xlsx" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -73,6 +81,16 @@
         <item name="schemas" type="d4e8921:DatabaseStructure$FamilyGroup" />
         <item name="public: schema" type="983ebcf7:PgImplModel$Schema" />
         <item name="tables" type="d4e8921:DatabaseStructure$FamilyGroup" />
+        <item name="convert_rules: table" type="69fad909:PgImplModel$LocalTable" />
+      </path>
+      <path>
+        <item name="Database" type="3277223f:DatabaseStructure$DbRootGroup" />
+        <item name="II@localhost" type="feb32156:DbDataSourceImpl" />
+        <item name="databases" type="d4e8921:DatabaseStructure$FamilyGroup" />
+        <item name="II: database" type="162271b6:PgImplModel$Database" />
+        <item name="schemas" type="d4e8921:DatabaseStructure$FamilyGroup" />
+        <item name="public: schema" type="983ebcf7:PgImplModel$Schema" />
+        <item name="tables" type="d4e8921:DatabaseStructure$FamilyGroup" />
         <item name="excel_tables: table" type="69fad909:PgImplModel$LocalTable" />
       </path>
     </expand>
@@ -83,37 +101,26 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/server.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="274">
-              <caret line="320" column="26" selection-start-line="320" selection-start-column="26" selection-end-line="320" selection-end-column="26" />
+            <state relative-caret-position="1793">
+              <caret line="362" column="19" selection-start-line="362" selection-start-column="19" selection-end-line="362" selection-end-column="19" />
               <folding>
-                <element signature="e#1839#3333#0" />
-                <element signature="e#3375#3772#0" />
-                <element signature="e#3808#6453#0" />
-                <element signature="e#6488#7781#0" />
-                <element signature="e#7998#8011#0" />
-                <element signature="e#8049#8083#0" />
-                <element signature="e#8119#9841#0" />
                 <element signature="n#!!block;n#updateChat#0" />
-                <element signature="n#!!block;n#checkToken#0" />
                 <element signature="n#!!block;n#checkTokenWs#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/old-back.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="183">
-              <caret line="193" column="130" selection-start-line="193" selection-start-column="130" selection-end-line="193" selection-end-column="130" />
+            <state relative-caret-position="6300">
+              <caret line="353" column="22" selection-start-line="353" selection-start-column="22" selection-end-line="353" selection-end-column="22" />
               <folding>
                 <element signature="e#870#962#0" />
-                <element signature="e#1476#1566#0" />
-                <element signature="n#!!block;n#modifyExcel#0" />
-                <element signature="n#!!block;n#makeFormula#0" />
                 <element signature="n#!!block;n#funcExc#0" />
                 <element signature="n#!!block;n#findEndIndex#0" />
                 <element signature="n#!!block;n#substringFunc#0" />
@@ -124,69 +131,13 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/77ee8942-a0c9-4202-baa7-63d1b33820f5/console_3.sql">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18">
-              <caret line="1" column="7" selection-start-line="1" selection-start-column="7" selection-end-line="1" selection-end-column="7" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/package.json">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="396">
-              <caret line="22" column="14" selection-start-line="22" selection-start-column="14" selection-end-line="22" selection-end-column="14" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/convert_rules">
-          <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
-            <state>
-              <filtering enabled="true" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/update_price_log">
-          <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
-            <state>
-              <filtering enabled="true" />
-              <column-attributes>
-                <column name="ctid" enabled="false" />
-              </column-attributes>
-            </state>
-          </provider>
-        </entry>
-      </file>
     </leaf>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>_</find>
-      <find>notifier</find>
-      <find>nodemailer</find>
-      <find>сщтм</find>
-      <find>clientPg</find>
-      <find>JSZip</find>
-      <find>attachments</find>
-      <find>elem[</find>
-      <find>EVarzega@Tablogix.ru</find>
-      <find>gmMakeRequest</find>
-      <find>makePrices</find>
-      <find>add_tables</find>
-      <find>mailListen</find>
-      <find>readdir</find>
-      <find>$</find>
       <find>convertXlsxToArray</find>
       <find>buildXlsx</find>
-      <find>convertFiles</find>
       <find>propRight</find>
-      <find>mergeArrays</find>
       <find>arrayofce</find>
       <find>console.log</find>
       <find>getrealPath</find>
@@ -196,6 +147,24 @@
       <find>template.index</find>
       <find>selivanov</find>
       <find>writeMail</find>
+      <find>mailListen</find>
+      <find>записан</find>
+      <find>console.lo</find>
+      <find>convertFiles</find>
+      <find>makePrices</find>
+      <find>uni</find>
+      <find>eval</find>
+      <find>build</find>
+      <find>УАЗ</find>
+      <find>BNA</find>
+      <find>::</find>
+      <find>union</find>
+      <find>СТРОКА</find>
+      <find>ЦС</find>
+      <find>mergeArrays</find>
+      <find>makeFormula</find>
+      <find>oldBack</find>
+      <find>3535</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -226,11 +195,12 @@
         <option value="$APPLICATION_CONFIG_DIR$/consoles/.datagrid/cell_21" />
         <option value="$APPLICATION_CONFIG_DIR$/consoles/.datagrid/cell_22" />
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_1.js" />
-        <option value="$APPLICATION_CONFIG_DIR$/consoles/db/77ee8942-a0c9-4202-baa7-63d1b33820f5/console_3.sql" />
         <option value="$PROJECT_DIR$/node_modules/iconv-lite/lib/index.d.ts" />
+        <option value="$APPLICATION_CONFIG_DIR$/consoles/db/77ee8942-a0c9-4202-baa7-63d1b33820f5/console_3.sql" />
+        <option value="$PROJECT_DIR$/old-back.js" />
+        <option value="$PROJECT_DIR$/node_modules/async-xlsx/lib/async-xlsx.js" />
         <option value="$APPLICATION_CONFIG_DIR$/consoles/.datagrid/cell_2" />
         <option value="$PROJECT_DIR$/server.js" />
-        <option value="$PROJECT_DIR$/old-back.js" />
       </list>
     </option>
   </component>
@@ -241,7 +211,7 @@
     </treeState>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-1928" />
+    <option name="x" value="-8" />
     <option name="y" value="-8" />
     <option name="width" value="1936" />
     <option name="height" value="1096" />
@@ -255,29 +225,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope">
-        <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
-          <expand>
-            <path>
-              <item name="price-server" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
-            </path>
-            <path>
-              <item name="price-server" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="static" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-            </path>
-            <path>
-              <item name="price-server" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="static" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-              <item name="config" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
-      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -289,6 +236,19 @@
               <item name="price-server" type="b2602c69:ProjectViewProjectNode" />
               <item name="price-server" type="462c0819:PsiDirectoryNode" />
               <item name="node_modules" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="price-server" type="b2602c69:ProjectViewProjectNode" />
+              <item name="price-server" type="462c0819:PsiDirectoryNode" />
+              <item name="node_modules" type="462c0819:PsiDirectoryNode" />
+              <item name="async-xlsx" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="price-server" type="b2602c69:ProjectViewProjectNode" />
+              <item name="price-server" type="462c0819:PsiDirectoryNode" />
+              <item name="node_modules" type="462c0819:PsiDirectoryNode" />
+              <item name="async-xlsx" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="price-server" type="b2602c69:ProjectViewProjectNode" />
@@ -308,6 +268,20 @@
               <item name="price-server" type="462c0819:PsiDirectoryNode" />
               <item name="node_modules" type="462c0819:PsiDirectoryNode" />
               <item name="xlsx" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="price-server" type="b2602c69:ProjectViewProjectNode" />
+              <item name="price-server" type="462c0819:PsiDirectoryNode" />
+              <item name="node_modules" type="462c0819:PsiDirectoryNode" />
+              <item name="xlsx" type="462c0819:PsiDirectoryNode" />
+              <item name="bin" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="price-server" type="b2602c69:ProjectViewProjectNode" />
+              <item name="price-server" type="462c0819:PsiDirectoryNode" />
+              <item name="node_modules" type="462c0819:PsiDirectoryNode" />
+              <item name="xlsx" type="462c0819:PsiDirectoryNode" />
+              <item name="types" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="price-server" type="b2602c69:ProjectViewProjectNode" />
@@ -344,6 +318,29 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope">
+        <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
+          <expand>
+            <path>
+              <item name="price-server" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+            </path>
+            <path>
+              <item name="price-server" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="static" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="price-server" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="static" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="config" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -352,7 +349,7 @@
     <property name="ToolWindowDocker.ShowToolbar" value="false" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1547453297394" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1547487717595" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="JavaScript 1.8" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/SQL Dialect" value="PostgreSQL" />
     <property name="database.console.LAST_STATE" value="false" />
@@ -417,12 +414,14 @@
       <workItem from="1547187896620" duration="7202000" />
       <workItem from="1547197415013" duration="18535000" />
       <workItem from="1547293929933" duration="29425000" />
-      <workItem from="1547442894098" duration="10068000" />
+      <workItem from="1547442894098" duration="20755000" />
+      <workItem from="1547479178724" duration="7822000" />
+      <workItem from="1547529644943" duration="1973000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="66300000" />
+    <option name="totallyTimeSpent" value="86782000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -434,10 +433,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1928" y="-8" width="1936" height="1096" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1096" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49947423" weight="0.2553305" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49947423" visible="true" weight="0.25799572" />
       <window_info id="Structure" order="1" sideWeight="0.5005258" side_tool="true" weight="0.24973601" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -447,9 +446,9 @@
       <window_info anchor="bottom" id="TypeScript" order="0" />
       <window_info anchor="bottom" id="Database Console" order="1" weight="0.32848233" />
       <window_info anchor="bottom" id="Message" order="2" />
-      <window_info anchor="bottom" id="Find" order="3" />
-      <window_info anchor="bottom" id="Run" order="4" sideWeight="0.4978678" weight="0.32848233" />
-      <window_info active="true" anchor="bottom" id="Debug" order="5" sideWeight="0.4978678" visible="true" weight="0.34407485" />
+      <window_info anchor="bottom" id="Find" order="3" weight="0.32952183" />
+      <window_info active="true" anchor="bottom" id="Run" order="4" sideWeight="0.4936034" visible="true" weight="0.32848233" />
+      <window_info anchor="bottom" id="Debug" order="5" sideWeight="0.4946695" weight="0.34407485" />
       <window_info anchor="bottom" id="Cvs" order="6" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="7" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="8" weight="0.32912722" />
@@ -457,7 +456,7 @@
       <window_info anchor="bottom" id="Version Control" order="10" />
       <window_info anchor="bottom" id="Database Changes" order="11" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="12" weight="0.32912722" />
-      <window_info anchor="bottom" id="Event Log" order="13" sideWeight="0.5021322" side_tool="true" visible="true" weight="0.34407485" />
+      <window_info anchor="bottom" id="Event Log" order="13" sideWeight="0.5063966" side_tool="true" visible="true" weight="0.32848233" />
       <window_info anchor="bottom" id="Maven" order="14" weight="0.32912722" />
       <window_info anchor="bottom" auto_hide="true" id="Ant Build" order="15" type="SLIDING" weight="0.25" />
       <window_info anchor="bottom" id="SQL Generator" order="16" weight="0.32952183" />
@@ -469,6 +468,39 @@
       <window_info anchor="right" id="Palette&#9;" order="5" />
       <window_info anchor="right" id="Database" order="6" visible="true" weight="0.1924307" />
     </layout>
+    <layout-to-restore>
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49947423" weight="0.2553305" />
+      <window_info id="Structure" order="1" sideWeight="0.5005258" side_tool="true" weight="0.24973601" />
+      <window_info id="Image Layers" order="2" />
+      <window_info id="Designer" order="3" />
+      <window_info id="UI Designer" order="4" />
+      <window_info id="Capture Tool" order="5" />
+      <window_info id="Favorites" order="6" sideWeight="0.5005258" side_tool="true" weight="0.24973601" />
+      <window_info anchor="bottom" id="TypeScript" order="0" />
+      <window_info anchor="bottom" id="Database Console" order="1" weight="0.32848233" />
+      <window_info anchor="bottom" id="Message" order="2" />
+      <window_info anchor="bottom" id="Find" order="3" />
+      <window_info anchor="bottom" id="Run" order="4" sideWeight="0.49733475" weight="0.32848233" />
+      <window_info anchor="bottom" id="Debug" order="5" sideWeight="0.49733475" visible="true" weight="0.34407485" />
+      <window_info anchor="bottom" id="Cvs" order="6" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="7" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="8" weight="0.32912722" />
+      <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" weight="0.32912722" />
+      <window_info anchor="bottom" id="Version Control" order="10" />
+      <window_info anchor="bottom" id="Database Changes" order="11" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Terminal" order="12" weight="0.32912722" />
+      <window_info anchor="bottom" id="Event Log" order="13" sideWeight="0.5026652" side_tool="true" visible="true" weight="0.34407485" />
+      <window_info anchor="bottom" id="Maven" order="14" weight="0.32912722" />
+      <window_info anchor="bottom" auto_hide="true" id="Ant Build" order="15" type="SLIDING" weight="0.25" />
+      <window_info anchor="bottom" id="SQL Generator" order="16" weight="0.32952183" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="1" weight="0.25" />
+      <window_info anchor="right" id="Palette" order="2" />
+      <window_info anchor="right" id="Theme Preview" order="3" />
+      <window_info anchor="right" id="Capture Analysis" order="4" />
+      <window_info anchor="right" id="Palette&#9;" order="5" />
+      <window_info active="true" anchor="right" id="Database" order="6" visible="true" weight="0.1924307" />
+    </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
@@ -483,45 +515,54 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/old-back.js</url>
-          <line>193</line>
-          <properties lambdaOrdinal="-1" />
+          <line>194</line>
           <option name="timeStamp" value="118" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/old-back.js</url>
-          <line>201</line>
-          <properties lambdaOrdinal="-1" />
+          <line>202</line>
           <option name="timeStamp" value="119" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/old-back.js</url>
-          <line>204</line>
-          <properties lambdaOrdinal="-1" />
+          <line>205</line>
           <option name="timeStamp" value="120" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/old-back.js</url>
-          <line>230</line>
-          <properties lambdaOrdinal="-1" />
+          <line>231</line>
           <option name="timeStamp" value="121" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/old-back.js</url>
-          <line>242</line>
-          <properties lambdaOrdinal="-1" />
+          <line>243</line>
           <option name="timeStamp" value="122" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/old-back.js</url>
-          <line>132</line>
-          <properties lambdaOrdinal="-1" />
+          <line>133</line>
           <option name="timeStamp" value="123" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/old-back.js</url>
-          <line>148</line>
-          <properties />
+          <line>149</line>
           <option name="timeStamp" value="127" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/old-back.js</url>
+          <line>390</line>
+          <option name="timeStamp" value="128" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/old-back.js</url>
+          <line>598</line>
+          <option name="timeStamp" value="162" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/server.js</url>
+          <line>346</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="163" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -533,14 +574,6 @@
         </breakpoint>
       </default-breakpoints>
     </breakpoint-manager>
-    <watches-manager>
-      <configuration name="NodeJSConfigurationType">
-        <watch expression="elem.outer_name" />
-        <watch expression="mail.from[0].address.toLowerCase()" />
-        <watch expression=" parsedObject[0].data.length" />
-        <watch expression="elem.outer_name" />
-      </configuration>
-    </watches-manager>
   </component>
   <component name="antWorkspaceConfiguration">
     <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
@@ -549,7 +582,22 @@
   <component name="debuggerHistoryManager">
     <expressions id="evaluateCodeFragment">
       <expression>
-        <expression-string>elem</expression-string>
+        <expression-string>newExcel[i]</expression-string>
+        <language-id>JavaScript</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>newExcel[i][j]</expression-string>
+        <language-id>JavaScript</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>newExcel</expression-string>
+        <language-id>JavaScript</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>template.formulas</expression-string>
         <language-id>JavaScript</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
@@ -559,42 +607,57 @@
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>template.indexOf(elem)</expression-string>
+        <expression-string>template.columns</expression-string>
         <language-id>JavaScript</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>JSON.stringify(newExcel[1])</expression-string>
+        <expression-string>template.columns.length</expression-string>
         <language-id>JavaScript</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>newExcel[1].toJSON</expression-string>
+        <expression-string>tempate.columns.length</expression-string>
         <language-id>JavaScript</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>newExcel[1].toJSON()</expression-string>
-        <language-id>JavaScript</language-id>
-        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>JSON.parse(newExcel[1])</expression-string>
-        <language-id>JavaScript</language-id>
-        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>newExcel[1]</expression-string>
-        <language-id>JavaScript</language-id>
-        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>newExcel</expression-string>
+        <expression-string>template.formulas[</expression-string>
         <language-id>JavaScript</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
     </expressions>
     <expressions id="breakpointCondition">
+      <expression>
+        <expression-string>i &gt; 2</expression-string>
+        <language-id>JavaScript</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>a1[i][0] === 'UAZ'</expression-string>
+        <language-id>JavaScript</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>newExcel[i][j] === 'КУЗОВ ОКРАШЕННЫЙ И ОБИТЫЙ  ЗЕЛЕНЫЙ НЕМЕТАЛЛИК '</expression-string>
+        <language-id>JavaScript</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>newExcel[i][j] == '374100500001050BNA'</expression-string>
+        <language-id>JavaScript</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>formula !== '\'HYUNDAI\''</expression-string>
+        <language-id>JavaScript</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>formula !== 'HYUNDAI'</expression-string>
+        <language-id>JavaScript</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
       <expression>
         <expression-string>mail.from[0].address.toLowerCase() === 'spanfilova@planeta-avto.ru'</expression-string>
         <language-id>JavaScript</language-id>
@@ -655,13 +718,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/additional_tables">
-      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
-        <state>
-          <filtering enabled="true" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/node_modules/xlsx/node_modules/jszip/lib/zipEntries.js" />
     <entry file="file://$PROJECT_DIR$/node_modules/xlsx/node_modules/jszip/lib/index.js" />
     <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/ford_add0.sql">
@@ -681,13 +737,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/rules_tables">
-      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
-        <state>
-          <filtering enabled="true" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/77ee8942-a0c9-4202-baa7-63d1b33820f5/console_2.sql">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="36">
@@ -699,13 +748,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="355">
           <caret line="5150" column="25" selection-start-line="5150" selection-start-column="25" selection-end-line="5150" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/headers">
-      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
-        <state>
-          <filtering enabled="true" />
         </state>
       </provider>
     </entry>
@@ -743,50 +785,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/node_modules/pg/lib/connection.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="193">
-          <caret line="378" column="18" selection-start-line="378" selection-start-column="18" selection-end-line="378" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/node_modules/pg/lib/client.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="471">
-          <caret line="418" column="45" selection-start-line="418" selection-start-column="45" selection-end-line="418" selection-end-column="45" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/templates">
-      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
-        <state>
-          <filtering enabled="true" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/server.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="274">
-          <caret line="320" column="26" selection-start-line="320" selection-start-column="26" selection-end-line="320" selection-end-column="26" />
-          <folding>
-            <element signature="e#1839#3333#0" />
-            <element signature="e#3375#3772#0" />
-            <element signature="e#3808#6453#0" />
-            <element signature="e#6488#7781#0" />
-            <element signature="e#7998#8011#0" />
-            <element signature="e#8049#8083#0" />
-            <element signature="e#8119#9841#0" />
-            <element signature="n#!!block;n#updateChat#0" />
-            <element signature="n#!!block;n#checkToken#0" />
-            <element signature="n#!!block;n#checkTokenWs#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/package.json">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="396">
           <caret line="22" column="14" selection-start-line="22" selection-start-column="14" selection-end-line="22" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/node_modules/pg/lib/connection.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="206">
+          <caret line="553" column="10" selection-start-line="553" selection-start-column="10" selection-end-line="553" selection-end-column="10" />
         </state>
       </provider>
     </entry>
@@ -800,6 +809,74 @@
         </state>
       </provider>
     </entry>
+    <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/landrover_add0">
+      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
+        <state>
+          <filtering enabled="true" />
+          <column-attributes>
+            <column name="ctid" enabled="false" />
+          </column-attributes>
+        </state>
+      </provider>
+    </entry>
+    <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/jaguar_add0">
+      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
+        <state>
+          <filtering enabled="true" />
+          <column-attributes>
+            <column name="ctid" enabled="false" />
+          </column-attributes>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/77ee8942-a0c9-4202-baa7-63d1b33820f5/console_3.sql">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-13068">
+          <caret column="29" selection-start-column="29" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/node_modules/pg/lib/client.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7524">
+          <caret line="418" column="45" selection-start-line="418" selection-start-column="45" selection-end-line="418" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/additional_tables">
+      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
+        <state>
+          <filtering enabled="true" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/node_modules/async-xlsx/index.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/rules_tables">
+      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
+        <state>
+          <filtering enabled="true" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/uaz1_add0">
+      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
+        <state>
+          <filtering enabled="true" />
+          <column-attributes>
+            <column name="ctid" enabled="false" />
+          </column-attributes>
+        </state>
+      </provider>
+    </entry>
+    <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/templates">
+      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
+        <state>
+          <filtering enabled="true" />
+        </state>
+      </provider>
+    </entry>
     <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/convert_rules">
       <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
         <state>
@@ -807,22 +884,47 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/77ee8942-a0c9-4202-baa7-63d1b33820f5/console_3.sql">
+    <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/uaz_add0">
+      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
+        <state>
+          <filtering enabled="true" />
+          <column-attributes>
+            <column name="ctid" enabled="false" />
+          </column-attributes>
+        </state>
+      </provider>
+    </entry>
+    <entry file="das://77ee8942-a0c9-4202-baa7-63d1b33820f5/database/II/schema/public/table/headers">
+      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
+        <state>
+          <filtering enabled="true" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/node_modules/async-xlsx/lib/async-xlsx.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="1" column="7" selection-start-line="1" selection-start-column="7" selection-end-line="1" selection-end-column="7" />
+        <state relative-caret-position="224">
+          <caret line="70" column="52" selection-start-line="70" selection-start-column="52" selection-end-line="70" selection-end-column="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1793">
+          <caret line="362" column="19" selection-start-line="362" selection-start-column="19" selection-end-line="362" selection-end-column="19" />
+          <folding>
+            <element signature="n#!!block;n#updateChat#0" />
+            <element signature="n#!!block;n#checkTokenWs#0" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/old-back.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="183">
-          <caret line="193" column="130" selection-start-line="193" selection-start-column="130" selection-end-line="193" selection-end-column="130" />
+        <state relative-caret-position="6300">
+          <caret line="353" column="22" selection-start-line="353" selection-start-column="22" selection-end-line="353" selection-end-column="22" />
           <folding>
             <element signature="e#870#962#0" />
-            <element signature="e#1476#1566#0" />
-            <element signature="n#!!block;n#modifyExcel#0" />
-            <element signature="n#!!block;n#makeFormula#0" />
             <element signature="n#!!block;n#funcExc#0" />
             <element signature="n#!!block;n#findEndIndex#0" />
             <element signature="n#!!block;n#substringFunc#0" />
