@@ -169,7 +169,32 @@ io.on('connection', client => {
   });
   client.on('subscribe', (data) => {
     client.join(data.token);
-  })
+  });
+  client.on('loadTable', data => {
+     checkTokenWs(data)
+         .then(result => {
+             if (result.success) {
+                 let queryRules = {
+                     text: `select rule_name,
+                                   s.name AS sender,
+                                   array(select rr.name  AS receiver
+                                         from send_receivers
+                                                LEFT JOIN receivers rr ON rr.id = send_receivers.receiver
+                                         WHERE send_table = send_rules.id) AS receivers,
+                                   send_rules.id,
+                                   subscribe_to_update,
+                                   frequency,
+                                   result_name,
+                                   in_use
+                            from send_rules
+                                   LEFT JOIN senders s on send_rules.sender = s.id`
+                 };
+                 clientPg.query(queryRules).then(result =>{
+                     io.to(data.token).emit('loadTableAnswer', {table: result.rows});
+                 })
+             }
+         })
+  });
   client.on('newMessage', data => {
     checkTokenWs(data)
         .then(result => {
@@ -258,29 +283,7 @@ function updateChat(data) {
       .catch(e => console.log(e))
 }
 
-function loadConvertRules() {
 
-    let query = {
-        text: `SELECT *
-               FROM convert_rules`
-    }
-
-    clientPg.query(query)
-        .then(res => {
-            res.rows.forEach(row => {
-                let querySessions = {
-                    text: 'SELECT token FROM sessions WHERE username = $1 OR username = $2',
-                    values: [row.username, row.user2]
-                };
-                clientPg.query(querySessions)
-                    .then(res => res.rows.forEach(session => {
-                        io.to(session.token).emit('newMessage', {text: row.text, date: row.date, user: row.username, user2: row.user2});
-                    }));
-
-            })
-        })
-        .catch(e => console.log(e))
-}
 
 function checkToken(req) {
   return new Promise(resolve => {
