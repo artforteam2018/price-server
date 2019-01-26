@@ -22,22 +22,6 @@ clientPg.connect(null, null);
 
 clientPg.query({
     text: 'SELECT * FROM SETTINGS WHERE folder = $1',
-    values: ['Почта для рассылки']
-})
-    .then(result => {
-        const mailTransport = nodemailer.createTransport({
-            host: result.rows.filter(row => row.name === 'Хостинг почты')[0].param,
-            port: result.rows.filter(row => row.name === 'Порт почты')[0].param,
-            secure: true,
-            auth: {
-                user: result.rows.filter(row => row.name === 'Имя пользователя')[0].param,
-                pass: result.rows.filter(row => row.name === 'Пароль')[0].param
-            }
-        });
-    });
-
-clientPg.query({
-    text: 'SELECT * FROM SETTINGS WHERE folder = $1',
     values: ['Почта с прайсами']
 })
     .then(result => {
@@ -48,7 +32,7 @@ clientPg.query({
             port: result.rows.filter(row => row.name === 'Порт')[0].param,
             tls: true,
             tlsOptions: {rejectUnauthorized: false},
-            search: ['SEEN'],
+            search: ['UNSEEN'],
             debug: (e) => {
                 if (e.includes('[connection] Error')) {
                     console.log("Ошибка.");
@@ -100,9 +84,8 @@ function mergeArrays(a1, a2, propLeft, propRight, newLeft, newRight) {
 async function main() {
     let query = `SELECT convert_rules.id,
                         sender,
-                        outer_name,
+                        t.pseudoname AS outer_name,
                         filter,
-                        in_use,
                         t.filters     AS filters,
                         t.formulas    AS formulas,
                         t.unions      AS unions,
@@ -114,18 +97,19 @@ async function main() {
                         LEFT JOIN update_price_log AS upl on convert_rules.id = upl.convert_rule
                         LEFT JOIN templates t on convert_rules.template = t.id
                         LEFT JOIN headers h on convert_rules.headers = h.id
-                 GROUP BY convert_rules.id, title_filter, in_use, outer_name, filter, sender, template, source, t.filters, h.columns,
+                 WHERE convert_rules.removed = false
+                 GROUP BY convert_rules.id, title_filter, pseudoname, filter, sender, template, source, t.filters, h.columns,
                    t.formulas, t.unions
                  ORDER BY convert_rules.id
     `;
 
     let template = await convertDBQueryToArray(query);
     //await mailListen(template);
-    //await gmMakeRequest(template);
+    await gmMakeRequest(template);
 
     template = await convertDBQueryToArray(query);
     await makePrices(template);
-
+    clientPg.end();
     return 0;
 }
 
@@ -255,10 +239,10 @@ async function mailListen(template) {
 async function makePrices(template) {
     return new Promise(async resolve => {
         console.log("Запись прайсов...");
-        for (let i = 1; i < template.length; i++) {
+        for (let i = 0; i < template.length; i++) {
 
             /** @namespace template.in_use */
-            if (template[i].source.length > 0 && template[i].in_use) {
+            if (template[i].source.length > 0) {
 
                 let main_file = '';
 
@@ -305,7 +289,7 @@ async function findFile(path) {
 function convertTxtToArray(path) {
     return new Promise((resolve) => {
 
-        fs.readFile(__static + path, null, (err, data) => {
+        fs.readFile(path, null, (err, data) => {
 
             let file = data.toString();
             let object = [];
@@ -407,7 +391,7 @@ async function convertFiles(path, template, tables, resultName) {
 
             let object = await convertTxtToArray(path);
             let ee = await modifyExcel(object, template);
-            await buildXlsx(filename, ee, resultName);
+            await buildXlsx(ee, resultName);
             resolve();
 
 
@@ -622,7 +606,7 @@ async function modifyExcel(parsedObject, template, arrayOfTables, resultName) {
 
                             formula = eval((formula.replace(/\r/g, '').replace(/\n/g, '')));
                         } catch (e) {
-                            console.log(formula);
+                            console.log(ff);
                         }
                         if (formula === 2/0){
                             console.log(ff)
@@ -656,7 +640,7 @@ async function modifyExcel(parsedObject, template, arrayOfTables, resultName) {
 function makeFormula(str, elem) {
     return new Promise(async resolve => {
 
-        str = str.replace(/\b(?:\W|^|)([A-Z])\b(?:\W|$)/g, function (str) {
+        str = str.replace(/\b(?:\W|^|)([A-Z])\b([^']|$)(?:\W|$|)/g, function (str) {
             return str.replace(/[A-Z]/g, function (str) {
                 return 'elem[' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(str) + ']'
             })
@@ -667,7 +651,8 @@ function makeFormula(str, elem) {
         for (let k = 0; k < elem.length; k++) {
 
             if (typeof elem[k] === 'string') {
-                let elemStr = elem[k].replace(/"/g, '\\\"');
+                //let elemStr = elem[k].replace(/"/g, "`");
+                let elemStr = elem[k].replace(/"/g, "");
                 elemStr = elemStr.replace(/\(/g, ' ');
                 elemStr = elemStr.replace(/\)/g, ' ');
                 if (str.includes('elem[') && typeof elemStr === 'number' ||
@@ -675,7 +660,7 @@ function makeFormula(str, elem) {
 
                     str = str.split('elem[' + k + ']').join(elemStr.replace(/,/g, '.'))
                 } else {
-                    str = str.split('elem[' + k + ']').join('"' + elemStr + '"')
+                    str = str.split('elem[' + k + ']').join('`' + elemStr + '`')
                 }
             } else {
                 if (elem[k] === undefined) {
@@ -760,7 +745,6 @@ function funcExc(str) {
             str = await substringFunc(str, '(', ')')
 
         }
-
         resolve([str, indexOfLast])
     })
 }
@@ -868,9 +852,9 @@ function gmMakeRequest(template) {
                             form: {
                                 __EVENTTARGET: 'ctl01',
                                 __EVENTARGUMENT: '',
-                                __VIEWSTATE: '/wEPDwULLTEzNjQ2MDIxNTAPZBYEZg9kFggCAQ8WAh4JaW5uZXJodG1sBT5HTSBTeXN0ZW0gLSDQodC+0YHRgtC+0Y/QvdC40LUg0YHQutC70LDQtNCwINC30LDQv9GH0LDRgdGC0LXQuWQCAw88KwAFAQMUKwACEBYEHgZJdGVtSUQFFlRvcDFfTWVudTEtbWVudUl0ZW0wMDAeCEl0ZW1UZXh0BQ7QodC40YHRgtC10LzQsBQrAAIQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMC1zdWJNZW51LW1lbnVJdGVtMDAxHwIFF9Ch0LzQtdC90LAg0L/QsNGA0L7Qu9GPHgdJdGVtVVJMBQ9jaGFuZ2VwYXNzLmFzcHhkZBAWBh8BBSpUb3AxX01lbnUxLW1lbnVJdGVtMDAwLXN1Yk1lbnUtbWVudUl0ZW0wMDIfAgUK0JLRi9GF0L7QtB8DBQlleGl0LmFzcHhkZGQQFgQfAQUWVG9wMV9NZW51MS1tZW51SXRlbTAwMR8CBR3QodC60LvQsNC0INC30LDQv9GH0LDRgdGC0LXQuRQrAAQQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMS1zdWJNZW51LW1lbnVJdGVtMDAwHwIFMtCh0L7RgdGC0L7Rj9C90LjQtSDRgdC60LvQsNC00LAg0LfQsNC/0YfQsNGB0YLQtdC5HwMFDGludjMxMHQuYXNweGRkEBYGHwEFKlRvcDFfTWVudTEtbWVudUl0ZW0wMDEtc3ViTWVudS1tZW51SXRlbTAwMR8CBSHQntGC0LvQvtC20LXQvdC90YvQtSDQt9Cw0LrQsNC30YsfAwUMb3JwMTQwdC5hc3B4ZGQQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMS1zdWJNZW51LW1lbnVJdGVtMDAyHwIFG9Ch0YLQsNGC0YPRgSDQt9Cw0LrQsNC30L7Qsh8DBQxzdG0xMTB0LmFzcHhkZBAWBh8BBSpUb3AxX01lbnUxLW1lbnVJdGVtMDAxLXN1Yk1lbnUtbWVudUl0ZW0wMDMfAgUd0JfQsNC60LDQtyDQt9Cw0L/Rh9Cw0YHRgtC10LkfAwULb3JwMTEwLmFzcHhkZGRkAgUPFgIfAAUq0JfQtNGA0LDQstGB0YLQstGD0LnRgtC1IFN2ZXRsYW5hIEtvc2htYXIhZAIHDxYCHgdWaXNpYmxlaGQCAg9kFgJmD2QWAgIHD2QWAmYPFgIfAAVi0J7QsdC90L7QstC70LXQvdC40LUgREFUOiAxOC4xMi4yMDE1IDA0OjIwOjQzPGJyPtCe0LHQvdC+0LLQu9C10L3QuNC1IFNORzogMTMuMTEuMjAxOCAxMzoyNzo0Mjxicj5kZOuFff9Q788OamS8YuIzhvA=',
+                                __VIEWSTATE: '/wEPDwULLTEzNjQ2MDIxNTAPZBYEZg9kFggCAQ8WAh4JaW5uZXJodG1sBT5HTSBTeXN0ZW0gLSDQodC+0YHRgtC+0Y/QvdC40LUg0YHQutC70LDQtNCwINC30LDQv9GH0LDRgdGC0LXQuWQCAw88KwAFAQMUKwACEBYEHgZJdGVtSUQFFlRvcDFfTWVudTEtbWVudUl0ZW0wMDAeCEl0ZW1UZXh0BQ7QodC40YHRgtC10LzQsBQrAAIQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMC1zdWJNZW51LW1lbnVJdGVtMDAxHwIFF9Ch0LzQtdC90LAg0L/QsNGA0L7Qu9GPHgdJdGVtVVJMBQ9jaGFuZ2VwYXNzLmFzcHhkZBAWBh8BBSpUb3AxX01lbnUxLW1lbnVJdGVtMDAwLXN1Yk1lbnUtbWVudUl0ZW0wMDIfAgUK0JLRi9GF0L7QtB8DBQlleGl0LmFzcHhkZGQQFgQfAQUWVG9wMV9NZW51MS1tZW51SXRlbTAwMR8CBR3QodC60LvQsNC0INC30LDQv9GH0LDRgdGC0LXQuRQrAAQQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMS1zdWJNZW51LW1lbnVJdGVtMDAwHwIFMtCh0L7RgdGC0L7Rj9C90LjQtSDRgdC60LvQsNC00LAg0LfQsNC/0YfQsNGB0YLQtdC5HwMFDGludjMxMHQuYXNweGRkEBYGHwEFKlRvcDFfTWVudTEtbWVudUl0ZW0wMDEtc3ViTWVudS1tZW51SXRlbTAwMR8CBSHQntGC0LvQvtC20LXQvdC90YvQtSDQt9Cw0LrQsNC30YsfAwUMb3JwMTQwdC5hc3B4ZGQQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMS1zdWJNZW51LW1lbnVJdGVtMDAyHwIFG9Ch0YLQsNGC0YPRgSDQt9Cw0LrQsNC30L7Qsh8DBQxzdG0xMTB0LmFzcHhkZBAWBh8BBSpUb3AxX01lbnUxLW1lbnVJdGVtMDAxLXN1Yk1lbnUtbWVudUl0ZW0wMDMfAgUd0JfQsNC60LDQtyDQt9Cw0L/Rh9Cw0YHRgtC10LkfAwULb3JwMTEwLmFzcHhkZGRkAgUPFgIfAAUq0JfQtNGA0LDQstGB0YLQstGD0LnRgtC1IFN2ZXRsYW5hIEtvc2htYXIhZAIHDxYCHgdWaXNpYmxlaGQCAg9kFgJmD2QWAgIHD2QWAmYPFgIfAAVi0J7QsdC90L7QstC70LXQvdC40LUgREFUOiAxOC4xMi4yMDE1IDA0OjIwOjQzPGJyPtCe0LHQvdC+0LLQu9C10L3QuNC1IFNORzogMjMuMDEuMjAxOSAxMzoyODo1OTxicj5kZDeZ0nCJ7JYHC1BgaScT0+E=',
                                 __VIEWSTATEGENERATOR: 'ACCA6985',
-                                __EVENTVALIDATION: '/wEdAAWNpNjlvVVSohfEXagCi5junS6zCR2bqUXJuevSr6A3NiXIFWL+wv45SHU62q4rLobxTrg7s/eG70UIAOod3OxqcWtaTiCzWpv2jfgTJfZJLl0276KKSn4egmlH8+40pAM=',
+                                __EVENTVALIDATION: '/wEdAAWkZZu4SpMvIFRnXbSzYtL1nS6zCR2bqUXJuevSr6A3NiXIFWL+wv45SHU62q4rLobxTrg7s/eG70UIAOod3OxqcWtaTiCzWpv2jfgTJfZJLmn4OSO2uJ+O7zNnpLgP+WU=',
                                 tMask: '',
                                 hdnMask: ''
                             },
@@ -915,4 +899,4 @@ function convertDBQueryToArray(query) {
     })
 }
 
-module.exports.main = main;
+main();
