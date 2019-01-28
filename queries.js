@@ -7,6 +7,7 @@ let getTableQuery = `SELECT rule_name,
                             intervals,
                             frequency,
                             title,
+                            region,
                             MAX(date),
                             array(select t.id AS template
                                   from send_rules_templates
@@ -29,7 +30,7 @@ let getTableQuery = `SELECT rule_name,
                                                         ON send_price_log.date = send_price_log_inner_1.date AND
                                                            send_price_log.send_rule = send_price_log_inner_1.send_rule
                      ) send_price_log_inner_2 ON send_price_log_inner_2.send_rule = id
-                     WHERE removed = false
+                     WHERE removed = false AND (region = $1 OR region isnull)
                      GROUP BY rule_name, sender, id, subscribe_to_update, result_name, in_use, intervals, frequency, title, removed`;
 
 let getTableQuery2 = `SELECT rule_name,
@@ -41,6 +42,7 @@ let getTableQuery2 = `SELECT rule_name,
                             intervals,
                             frequency,
                             title,
+                            region,
                              array(select t.id AS template
                                    from send_rules_templates
                                           LEFT JOIN convert_rules t ON send_rules_templates.convert_rule = t.id
@@ -96,7 +98,7 @@ let getTableQuery3 = `SELECT rule_name,
                       WHERE removed = false
 `;
 
-let changeTableQuery = 'UPDATE public.send_rules SET rule_name = $1, sender = $2, subscribe_to_update =$3, result_name =$4, in_use =$5, intervals =$6, frequency =$7, title =$8, removed =$9 WHERE id = $10';
+let changeTableQuery = 'UPDATE public.send_rules SET rule_name = $1, sender = $2, subscribe_to_update =$3, result_name =$4, in_use =$5, intervals =$6, frequency =$7, title =$8, region =$9, removed =$10 WHERE id = $11';
 
 let insertTableQuery = 'INSERT INTO public.send_rules(rule_name, sender, subscribe_to_update, result_name, in_use, intervals, frequency, title, removed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id';
 
@@ -146,7 +148,7 @@ let getUsersQuery = `SELECT *
                    FROM users
                    WHERE username = $1`;
 
-let insertUsersQuery = 'INSERT INTO users(username, pwd_hash) VALUES($1, $2)';
+let insertUsersQuery = 'INSERT INTO users(username, pwd_hash, region) VALUES($1, $2, $3)';
 
 let insertSessionQuery = `INSERT INTO sessions(username, token, user_agent, ip, expire)
                                                VALUES ($1, $2, $3, $4, $5)`;
@@ -188,7 +190,7 @@ let updateUpdateLog = 'UPDATE update_price_log SET send = $3 WHERE convert_rule 
 
 let insertSendLog = 'INSERT INTO send_price_log(send_rule, date, success) VALUES ($1, $2, $3)';
 
-let changeSendLog = 'UPDATE send_price_log SET success = $3, date = $2, info =$4 WHERE send_rule = $1';
+let changeSendLog = 'UPDATE send_price_log SET success = $3, date = $2, info =$4 WHERE send_rule = $1 AND date = $5';
 
 let deleteSendTemplates = `DELETE FROM send_rules_templates
                             WHERE send_rule = $1`;
@@ -206,6 +208,10 @@ let getSettings = `SELECT * FROM SETTINGS WHERE folder = $1`;
 
 let getSettingsQuery = `SELECT * FROM SETTINGS ORDER BY id`;
 let changeSettingsQuery = 'UPDATE settings SET param = $1 WHERE folder = $2 AND name = $3';
+
+let adminQuery = 'SELECT * FROM users WHERE username = $1';
+
+let getRegion = 'SELECT region FROM users WHERE username = $1';
 
 module.exports.getTableQuery = getTableQuery;
 module.exports.getTableQuery2 = getTableQuery2;
@@ -263,3 +269,6 @@ module.exports.insertSendReceivers = insertSendReceivers;
 module.exports.getSettings = getSettings;
 module.exports.getSettingsQuery = getSettingsQuery;
 module.exports.changeSettingsQuery = changeSettingsQuery;
+
+module.exports.adminQuery = adminQuery;
+module.exports.getRegion = getRegion;

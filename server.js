@@ -65,7 +65,7 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', "*");
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Token, Username');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Token, Username, Region');
     next()
 });
 
@@ -402,6 +402,7 @@ app.post('/changeTable', (req, res) => {
                                             rule.intervals,
                                             rule.frequency,
                                             rule.title,
+                                            rule.region,
                                             rule.removed,
                                             rule.id
                                         ]
@@ -740,12 +741,16 @@ app.post('/auth', (req, res) => {
 
                                     clientPg.query(queryCreateSession)
                                         .then(
-                                            function () {
+                                            async function () {
                                                 res.send({
                                                     success: true,
                                                     type: 200,
                                                     token: token,
                                                     username: username,
+                                                    region: (await clientPg.query({
+                                                        text: queries.getRegion,
+                                                        values: [username]
+                                                    })).rows[0].region,
                                                     expire: expire
                                                 });
                                             }, function (err) {
@@ -773,41 +778,66 @@ app.post('/auth', (req, res) => {
         })
 });
 
-app.post('/reg', (req, res) => {
-    let queryIdentify = {
-        text: queries.getUsersQuery,
-        values: [req.body.username]
-    };
-    clientPg.query(queryIdentify)
-        .then(result => {
-            if (result.rows.length > 0) {
-                res.send({success: false, type: 409})
-            } else {
-                scrypt.kdf(req.body.password + sol, {N: 16, r: 1, p: 1}, function (err, result) {
-                    let password = result.toString("base64");
-                    if (req.body.username.length > 0 && password.length > 0) {
-                        let queryRegister = {
-                            text: queries.insertUsersQuery,
-                            values: [req.body.username, password],
-                        };
+app.post('/reg', async (req, res) => {
+    let adminPass = false;
 
-                        clientPg.query(queryRegister)
-                            .then(
-                                function () {
-                                    res.send({success: true, type: 200})
-                                }, function (err) {
-                                    res.send({success: false, type: 500});
-                                    console.log(err)
-                                });
+        let adminRes = await clientPg.query({text: queries.adminQuery, values: ['admin']});
+
+        await Promise.all(adminRes.rows.map(row => {
+            return new Promise(resolve => {
+                scrypt.verifyKdf(Buffer.from(row.pwd_hash, 'base64'), req.body.admin_password + sol)
+                    .then((result)=>{
+                        if (result) {
+                            adminPass = true;
+                        }
+                        resolve();
+                    })
+                    .catch((reason)=>{
+                        console.log(reason);
+                        resolve();
+                    })
+            });
+        }));
+
+
+        if (adminPass) {
+            let queryIdentify = {
+                text: queries.getUsersQuery,
+                values: [req.body.username]
+            };
+            clientPg.query(queryIdentify)
+                .then(result => {
+                    if (result.rows.length > 0) {
+                        res.send({success: false, type: 409})
                     } else {
-                        res.send({success: false, type: 500});
+                        scrypt.kdf(req.body.password + sol, {N: 16, r: 1, p: 1}, function (err, result) {
+                            let password = result.toString("base64");
+                            if (req.body.username.length > 0 && password.length > 0) {
+                                let queryRegister = {
+                                    text: queries.insertUsersQuery,
+                                    values: [req.body.username, password, req.body.region],
+                                };
+
+                                clientPg.query(queryRegister)
+                                    .then(
+                                        function () {
+                                            res.send({success: true, type: 200})
+                                        }, function (err) {
+                                            res.send({success: false, type: 500});
+                                            console.log(err)
+                                        });
+                            } else {
+                                res.send({success: false, type: 500});
+                            }
+                        });
                     }
-                });
-            }
-        }, err => {
-            console.log(err);
+                }, err => {
+                    console.log(err);
+                    res.send({success: false, type: 500})
+                })
+        } else {
             res.send({success: false, type: 500})
-        })
+        }
 });
 
 app.use(function (req, res, next) {
@@ -828,7 +858,8 @@ io.on('connection', client => {
             .then(result => {
                 if (result.success) {
                     let queryRules = {
-                        text: queries.getTableQuery
+                        text: queries.getTableQuery,
+                        values: [data.region]
                     };
                     clientPg.query(queryRules).then(result => {
 
@@ -839,7 +870,7 @@ io.on('connection', client => {
                                     values: [row.id, 4]
                                 })
                                     .then(result => {
-                                        io.to(data.token).emit('updateSendLog', {log: result.rows});
+                                        io.to(data.token).emit('updateSendLog', {log: result.rows.map(row => ({date: row.date.getTime(), info: row.info, send_rule: row.send_rule, success: row.success}))});
                                     });
                             });
                         }, 200);
@@ -852,7 +883,7 @@ io.on('connection', client => {
                                         values: [row.id, 4]
                                     })
                                         .then(result => {
-                                            io.to(data.token).emit('updateSendLog', {log: result.rows});
+                                            io.to(data.token).emit('updateSendLog', {log: result.rows.map(row => ({date: row.date.getTime(), info: row.info, send_rule: row.send_rule, success: row.success}))});
                                         });
                                 })
                             }, 30 * 1000)});

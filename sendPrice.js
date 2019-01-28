@@ -119,9 +119,10 @@ function convertXlsxToArray(path) {
 
 async function createAndSendMail(receive, readyFolder, receiverList){
     return new Promise(async resolve => {
+        let oldDate = new Date();
         await clientPg.query({
             text: queries.insertSendLog,
-            values: [receive.id, new Date(), 'pending']
+            values: [receive.id, oldDate, 'pending']
         });
 
         let attach = [];
@@ -182,7 +183,7 @@ async function createAndSendMail(receive, readyFolder, receiverList){
             if (error) {
                 clientPg.query({
                     text: queries.changeSendLog,
-                    values: [receive.id, new Date(), 'error', error]
+                    values: [receive.id, new Date(), 'error', error, oldDate]
                 })
                     .then(()=>{
                         resolve();
@@ -194,7 +195,7 @@ async function createAndSendMail(receive, readyFolder, receiverList){
             } else {
                 clientPg.query({
                     text: queries.changeSendLog,
-                    values: [receive.id, new Date(), 'success', info]
+                    values: [receive.id, new Date(), 'success', info, oldDate]
                 })
                     .then(() => {
                         console.log("прайс сформирован и отослан на " + receive.receivers);
