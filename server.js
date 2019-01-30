@@ -36,7 +36,7 @@ clientPg.query({text: queries.getSettings, values: ['Почта с прайса�
         let freq = result.rows.filter(row => row.name === 'Частота обновления прайсов')[0].param;
         intervals.push({name: 'main', interval: setInterval(()=>{
                 console.log('Формирование прайсов');
-                exec('node old-back.js',
+                exec('node --max_old_space_size=9000 old-back',
                     function (error, stdout) {
                         console.log('stdout: ' + stdout);
                         if (error !== null) {

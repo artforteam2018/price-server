@@ -6,6 +6,7 @@ const iconv = require('iconv-lite');
 const {Client} = require('pg'); //работа с бд
 const JSZip = require('jszip'); //работа с архивами zip
 const readdir = util.promisify(fs.readdir); //чтобы асинк работал
+const writeFile = util.promisify(fs.writeFile); //чтобы асинк работал
 const nodemailer = require('nodemailer'); //прослушка почты
 const req = require('request');
 const emlformat = require('eml-format'); //Для работы с eml
@@ -32,7 +33,7 @@ clientPg.query({
             port: result.rows.filter(row => row.name === 'Порт')[0].param,
             tls: true,
             tlsOptions: {rejectUnauthorized: false},
-            search: ['SEEN'],
+            search: [['SINCE', new Date()]],
             debug: (e) => {
                 if (e.includes('[connection] Error')) {
                     console.log("Ошибка.");
@@ -160,11 +161,11 @@ async function mailListen(template) {
                             && elem.sender.toLowerCase() === mail.from[0].address.toLowerCase() && (elem.last_date === null ? true : elem.last_date < Date.parse(mail.date))) {
 
                             await Promise.all(mail.attachments.map(attach => {
-                                return new Promise(resolve2 => {
-                                    fs.writeFileSync('./attachments/' + attach.fileName, attach.content);
-                                    attach.path = fs.realpathSync('./attachments/' + attach.fileName);
-                                    attach.content = undefined;
-                                    resolve2();
+                                return new Promise(async resolve2 => {
+                                    fs.writeFile('./attachments/' + attach.fileName, attach.content, () => {
+                                        attach.path = fs.realpathSync('./attachments/' + attach.fileName);
+                                        resolve2();
+                                    });
                                 });
                             }));
 
@@ -208,6 +209,7 @@ async function mailListen(template) {
 
                                         let data = fs.readFileSync(filteredAttach[0].path);
 
+
                                         JSZip.loadAsync(data).then(async function (zip) {
                                             let files = Object.keys(zip.files);
                                             if (files.length > 0) {
@@ -228,6 +230,8 @@ async function mailListen(template) {
                                             }));
                                             resolve1();
 
+                                        }).catch ((e) => {
+                                            resolve1();
                                         });
                                     }
                                 } else {
@@ -255,7 +259,7 @@ async function makePrices(template) {
         for (let i = 0; i < template.length; i++) {
 
             /** @namespace template.in_use */
-            if (template[i].source.length > 0) {
+            if (template[i].source !== null && template[i].source.length > 0) {
 
                 let main_file = '';
 
@@ -353,7 +357,7 @@ function buildXlsx(newExcel, resultName) {
                     } else if (typeof newExcel[i][j] === 'string') {
                         text += '\'' + newExcel[i][j] + '\','
                     } else {
-                         text += '' + newExcel[i][j] + ','
+                        text += '' + newExcel[i][j] + ','
                     }
                 }
                 text = text.substring(0, text.length-1) + '),';
