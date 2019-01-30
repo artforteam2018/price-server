@@ -32,7 +32,7 @@ clientPg.query({
             port: result.rows.filter(row => row.name === 'Порт')[0].param,
             tls: true,
             tlsOptions: {rejectUnauthorized: false},
-            search: ['UNSEEN'],
+            search: ['SEEN'],
             debug: (e) => {
                 if (e.includes('[connection] Error')) {
                     console.log("Ошибка.");
@@ -154,7 +154,7 @@ async function mailListen(template) {
 
                 console.log(mail.from[0].address.toLowerCase());
                 await Promise.all(template.map(async (elem) => {
-                    return new Promise(resolve1 => {
+                    return new Promise(async resolve1 => {
 
                         if (mail.attachments !== undefined && elem.sender !== null
                             && elem.sender.toLowerCase() === mail.from[0].address.toLowerCase() && (elem.last_date === null ? true : elem.last_date < Date.parse(mail.date))) {
@@ -166,7 +166,7 @@ async function mailListen(template) {
 
                             if (elem.title_filter !== null) {
                                 if (!mail.subject.includes(elem.title_filter)) {
-                                    return;
+                                    resolve1();
                                 }
                             }
                             if (elem.filter === null) {
@@ -178,7 +178,7 @@ async function mailListen(template) {
                                         if (error) return console.log(error);
                                         let writePath = mailPath.substring(0, mailPath.lastIndexOf('\\') + 1) + "UAZ-EMAIL.xlsx";
                                         template = await writeMail(writePath, data.attachments["0"].data, mail.date, template, elem.id);
-
+                                        resolve1();
                                     });
                                 } else {
                                     if (mailPath.substring(mailPath.lastIndexOf('\\') + 1, mailPath.lastIndexOf('.')) === 'price') {
@@ -186,9 +186,10 @@ async function mailListen(template) {
                                         let buffer = fs.readFileSync(mailPath);
                                         let newName = mailPath.substring(0, mailPath.lastIndexOf('\\') + 1) + elem.outer_name + mailPath.substring(mailPath.lastIndexOf('.'), mailPath.length);
                                         template = await writeMail(newName, buffer, mail.date, template, elem.id)
-
+                                        resolve1();
                                     } else {
                                         template = await writeMail(mailPath, undefined, mail.date, template, elem.id);
+                                        resolve1();
                                     }
                                 }
                             } else {
@@ -215,6 +216,7 @@ async function mailListen(template) {
                                                 zip.files[file].async('uint8array').then(async (uint8array) => {
                                                     if (file.includes(elemFilter)) {
                                                         template = await writeMail(folder + '\\' + file, uint8array, mail.date, template, elem.id)
+                                                        resolve1();
                                                     }
                                                 })
 
@@ -227,6 +229,7 @@ async function mailListen(template) {
 
                                     if (filteredAttach.length > 0) {
                                         template = await writeMail(filteredAttach[0].path, undefined, mail.date, template, elem.id)
+                                        resolve1();
                                     }
                                 }
                             }
