@@ -37,6 +37,10 @@ node_modules/
 jspm_packages/
 .idea/
 
+#price
+ready/
+attachments/
+
 # TypeScript v1 declaration files
 typings/
 
