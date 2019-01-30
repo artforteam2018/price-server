@@ -3,33 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="c701e182-bb7c-4690-b1a2-bf7ec1da6680" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/attachments/1.eml" beforeDir="false" afterPath="$PROJECT_DIR$/attachments/1.eml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/attachments/CJD.xls" beforeDir="false" afterPath="$PROJECT_DIR$/attachments/CJD.xls" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/attachments/EDIX.zip" beforeDir="false" afterPath="$PROJECT_DIR$/attachments/EDIX.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/attachments/FIAT.xls" beforeDir="false" afterPath="$PROJECT_DIR$/attachments/FIAT.xls" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/attachments/HMCIS_Price_&amp;_Stock.XLSX" beforeDir="false" afterPath="$PROJECT_DIR$/attachments/HMCIS_Price_&amp;_Stock.XLSX" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/attachments/UAZ-CHEL.xls" beforeDir="false" afterPath="$PROJECT_DIR$/attachments/UAZ-CHEL.xls" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/attachments/UAZ-EMAIL.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/attachments/UAZ-EMAIL.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/attachments/gm-stock.txt" beforeDir="false" afterPath="$PROJECT_DIR$/attachments/gm-stock.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/attachments/price.xls" beforeDir="false" afterPath="$PROJECT_DIR$/attachments/price.xls" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/attachments/Шины зима 18-19 rev.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/attachments/Шины зима 18-19 rev.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/old-back.js" beforeDir="false" afterPath="$PROJECT_DIR$/old-back.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/queries.js" beforeDir="false" afterPath="$PROJECT_DIR$/queries.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ready/CHERY.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/ready/CHERY.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ready/CJD.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/ready/CJD.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ready/FIAT.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/ready/FIAT.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ready/FORD.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/ready/FORD.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ready/GM.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/ready/GM.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ready/HYUNDAI.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/ready/HYUNDAI.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ready/JAGUAR.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/ready/JAGUAR.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ready/LANDROVER.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/ready/LANDROVER.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ready/MITSUBISHI.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/ready/MITSUBISHI.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ready/SUBARU.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/ready/SUBARU.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ready/UAZ-CHEL.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/ready/UAZ-CHEL.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ready/UAZ-MSK.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/ready/UAZ-MSK.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sendPrice.js" beforeDir="false" afterPath="$PROJECT_DIR$/sendPrice.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/temp.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/temp.xlsx" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/node_modules/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -94,16 +67,16 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/queries.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="327">
+            <state relative-caret-position="3618">
               <caret line="201" column="51" selection-start-line="201" selection-start-column="51" selection-end-line="201" selection-end-column="51" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/2397a2a9-8c69-476b-a739-2d079a6fc1c9/console_1.sql">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="72">
@@ -117,9 +90,6 @@
           <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
             <state>
               <filtering enabled="true" />
-              <column-attributes>
-                <column name="ctid" enabled="false" />
-              </column-attributes>
             </state>
           </provider>
         </entry>
@@ -136,7 +106,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/old-back.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-14719">
+            <state relative-caret-position="396">
               <caret line="22" column="16" selection-start-line="22" selection-start-column="16" selection-end-line="22" selection-end-column="16" />
             </state>
           </provider>
@@ -206,6 +176,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -250,8 +222,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -260,7 +230,7 @@
     <property name="aspect.path.notification.shown" value="true" />
     <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1548668630557" />
     <property name="database.console.LAST_STATE" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../price-client" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="nodejs_package_manager_path" value="yarn" />
@@ -310,18 +280,19 @@
       <workItem from="1548489571622" duration="10356000" />
       <workItem from="1548586467489" duration="3992000" />
       <workItem from="1548651474919" duration="10177000" />
-      <workItem from="1548668824379" duration="1763000" />
+      <workItem from="1548668824379" duration="2747000" />
+      <workItem from="1548673155987" duration="1089000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="36395000" />
+    <option name="totallyTimeSpent" value="38468000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1096" extended-state="7" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.07942431" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.07995736" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -330,7 +301,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32952183" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32952183" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3991684" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -349,7 +320,7 @@
       <window_info anchor="right" id="Maven" order="5" />
       <window_info anchor="right" id="Capture Analysis" order="6" />
       <window_info anchor="right" id="Palette&#9;" order="7" />
-      <window_info anchor="right" id="Database" order="8" visible="true" weight="0.24307036" />
+      <window_info anchor="right" id="Database" order="8" visible="true" weight="0.24200426" />
     </layout>
     <layout-to-restore>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25266525" />
@@ -483,15 +454,28 @@
   </component>
   <component name="editorHistoryManager">
     <entry file="das://2397a2a9-8c69-476b-a739-2d079a6fc1c9/database/II/schema/public/table/users" />
-    <entry file="das://2397a2a9-8c69-476b-a739-2d079a6fc1c9/database/II/schema/public/table/settings" />
     <entry file="das://2397a2a9-8c69-476b-a739-2d079a6fc1c9/database/II/schema/public/table/templates" />
     <entry file="das://2397a2a9-8c69-476b-a739-2d079a6fc1c9/database/II/schema/public/table/send_rules" />
     <entry file="das://2397a2a9-8c69-476b-a739-2d079a6fc1c9/database/II/schema/public/table/convert_rules" />
     <entry file="das://2397a2a9-8c69-476b-a739-2d079a6fc1c9/database/II/schema/public/table/send_price_log" />
+    <entry file="file://$PROJECT_DIR$/queries.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3618">
+          <caret line="201" column="51" selection-start-line="201" selection-start-column="51" selection-end-line="201" selection-end-column="51" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/sendPrice.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3546">
           <caret line="197" column="77" selection-start-line="197" selection-start-column="77" selection-end-line="197" selection-end-column="77" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/old-back.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="22" column="16" selection-start-line="22" selection-start-column="16" selection-end-line="22" selection-end-column="16" />
         </state>
       </provider>
     </entry>
@@ -502,34 +486,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/old-back.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-14719">
-          <caret line="22" column="16" selection-start-line="22" selection-start-column="16" selection-end-line="22" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
     <entry file="das://2397a2a9-8c69-476b-a739-2d079a6fc1c9/database/II/schema/public/table/settings">
       <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
         <state>
           <filtering enabled="true" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="das://2397a2a9-8c69-476b-a739-2d079a6fc1c9/database/II/schema/public/table/settings">
-      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
-        <state>
-          <filtering enabled="true" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="das://2397a2a9-8c69-476b-a739-2d079a6fc1c9/database/II/schema/public/table/settings">
-      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
-        <state>
-          <filtering enabled="true" />
-          <column-attributes>
-            <column name="ctid" enabled="false" />
-          </column-attributes>
         </state>
       </provider>
     </entry>
@@ -537,13 +497,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="72">
           <caret line="4" column="88" selection-start-line="4" selection-start-column="88" selection-end-line="4" selection-end-column="88" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/queries.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="327">
-          <caret line="201" column="51" selection-start-line="201" selection-start-column="51" selection-end-line="201" selection-end-column="51" />
         </state>
       </provider>
     </entry>

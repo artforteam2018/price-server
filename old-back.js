@@ -150,87 +150,89 @@ async function mailListen(template) {
                 console.log("Произошла ошибка при работе с почтой. Описание ошибки: \n" + e);
                 resolve();
             })
-            .on('mail', function (mail) {
+            .on('mail', async function (mail) {
 
                 console.log(mail.from[0].address.toLowerCase());
-                template.map(async (elem) => {
+                await Promise.all(template.map(async (elem) => {
+                    return new Promise(resolve1 => {
 
-                    if (mail.attachments !== undefined && elem.sender !== null
-                        && elem.sender.toLowerCase() === mail.from[0].address.toLowerCase() && (elem.last_date === null ? true : elem.last_date < Date.parse(mail.date))) {
+                        if (mail.attachments !== undefined && elem.sender !== null
+                            && elem.sender.toLowerCase() === mail.from[0].address.toLowerCase() && (elem.last_date === null ? true : elem.last_date < Date.parse(mail.date))) {
 
-                        mail.attachments.forEach(attach => {
-                            fs.writeFileSync('./attachments/' + attach.fileName, attach.content);
-                            attach.path = fs.realpathSync('./attachments/' + attach.fileName)
-                        });
+                            mail.attachments.forEach(attach => {
+                                fs.writeFileSync('./attachments/' + attach.fileName, attach.content);
+                                attach.path = fs.realpathSync('./attachments/' + attach.fileName)
+                            });
 
-                        if (elem.title_filter !== null) {
-                            if (!mail.subject.includes(elem.title_filter)) {
-                                return;
-                            }
-                        }
-                        if (elem.filter === null) {
-                            let mailPath = mail.attachments["0"].path;
-                            if (mailPath.substring(mailPath.lastIndexOf('.') + 1, mailPath.length) === 'eml') {
-                                let eml = fs.readFileSync(mailPath, "utf-8");
-                                emlformat.read(eml, async (error, data) => {
-
-                                    if (error) return console.log(error);
-                                    let writePath = mailPath.substring(0, mailPath.lastIndexOf('\\') + 1) + "UAZ-EMAIL.xlsx";
-                                    template = await writeMail(writePath, data.attachments["0"].data, mail.date, template, elem.id);
-
-                                });
-                            } else {
-                                if (mailPath.substring(mailPath.lastIndexOf('\\') + 1, mailPath.lastIndexOf('.')) === 'price') {
-
-                                    let buffer = fs.readFileSync(mailPath);
-                                    let newName = mailPath.substring(0, mailPath.lastIndexOf('\\') + 1) + elem.outer_name + mailPath.substring(mailPath.lastIndexOf('.'), mailPath.length);
-                                    template = await writeMail(newName, buffer, mail.date, template, elem.id)
-
-                                } else {
-                                    template = await writeMail(mailPath, undefined, mail.date, template, elem.id);
+                            if (elem.title_filter !== null) {
+                                if (!mail.subject.includes(elem.title_filter)) {
+                                    return;
                                 }
                             }
-                        } else {
-                            //Если стоит : в шаблоне, значит это архив, работа с архивом
-                            if (elem.filter.includes(':')) {
-                                let elemZip = elem.filter.substring(0, elem.filter.indexOf(':'));
-                                let elemFilter = elem.filter.substring(elem.filter.indexOf(':') + 1, elem.filter.length);
-                                let filteredAttach = mail.attachments.filter((elem2) => elem2.path.includes(elemZip));
-                                if (filteredAttach.length > 0) {
+                            if (elem.filter === null) {
+                                let mailPath = mail.attachments["0"].path;
+                                if (mailPath.substring(mailPath.lastIndexOf('.') + 1, mailPath.length) === 'eml') {
+                                    let eml = fs.readFileSync(mailPath, "utf-8");
+                                    emlformat.read(eml, async (error, data) => {
 
-                                    let folder = filteredAttach[0].path.substring(0, filteredAttach[0].path.lastIndexOf('.'));
-
-                                    let data = fs.readFileSync(filteredAttach[0].path);
-
-                                    JSZip.loadAsync(data).then(function (zip) {
-                                        let files = Object.keys(zip.files);
-                                        if (files.length > 0) {
-
-                                            if (!fs.existsSync(folder)) {
-                                                fs.mkdirSync(folder);
-                                            }
-                                        }
-                                        files.forEach((file) => {
-                                            zip.files[file].async('uint8array').then(async (uint8array) => {
-                                                if (file.includes(elemFilter)) {
-                                                    template = await writeMail(folder + '\\' + file, uint8array, mail.date, template, elem.id)
-                                                }
-                                            })
-
-                                        })
+                                        if (error) return console.log(error);
+                                        let writePath = mailPath.substring(0, mailPath.lastIndexOf('\\') + 1) + "UAZ-EMAIL.xlsx";
+                                        template = await writeMail(writePath, data.attachments["0"].data, mail.date, template, elem.id);
 
                                     });
+                                } else {
+                                    if (mailPath.substring(mailPath.lastIndexOf('\\') + 1, mailPath.lastIndexOf('.')) === 'price') {
+
+                                        let buffer = fs.readFileSync(mailPath);
+                                        let newName = mailPath.substring(0, mailPath.lastIndexOf('\\') + 1) + elem.outer_name + mailPath.substring(mailPath.lastIndexOf('.'), mailPath.length);
+                                        template = await writeMail(newName, buffer, mail.date, template, elem.id)
+
+                                    } else {
+                                        template = await writeMail(mailPath, undefined, mail.date, template, elem.id);
+                                    }
                                 }
                             } else {
-                                let filteredAttach = mail.attachments.filter((elem2) => elem2.path.includes(elem.filter));
+                                //Если стоит : в шаблоне, значит это архив, работа с архивом
+                                if (elem.filter.includes(':')) {
+                                    let elemZip = elem.filter.substring(0, elem.filter.indexOf(':'));
+                                    let elemFilter = elem.filter.substring(elem.filter.indexOf(':') + 1, elem.filter.length);
+                                    let filteredAttach = mail.attachments.filter((elem2) => elem2.path.includes(elemZip));
+                                    if (filteredAttach.length > 0) {
 
-                                if (filteredAttach.length > 0) {
-                                    template = await writeMail(filteredAttach[0].path, undefined, mail.date, template, elem.id)
+                                        let folder = filteredAttach[0].path.substring(0, filteredAttach[0].path.lastIndexOf('.'));
+
+                                        let data = fs.readFileSync(filteredAttach[0].path);
+
+                                        JSZip.loadAsync(data).then(function (zip) {
+                                            let files = Object.keys(zip.files);
+                                            if (files.length > 0) {
+
+                                                if (!fs.existsSync(folder)) {
+                                                    fs.mkdirSync(folder);
+                                                }
+                                            }
+                                            files.forEach((file) => {
+                                                zip.files[file].async('uint8array').then(async (uint8array) => {
+                                                    if (file.includes(elemFilter)) {
+                                                        template = await writeMail(folder + '\\' + file, uint8array, mail.date, template, elem.id)
+                                                    }
+                                                })
+
+                                            })
+
+                                        });
+                                    }
+                                } else {
+                                    let filteredAttach = mail.attachments.filter((elem2) => elem2.path.includes(elem.filter));
+
+                                    if (filteredAttach.length > 0) {
+                                        template = await writeMail(filteredAttach[0].path, undefined, mail.date, template, elem.id)
+                                    }
                                 }
                             }
                         }
-                    }
-                })
+                    })
+                }))
 
             }).start();
     });
