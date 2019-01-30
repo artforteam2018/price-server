@@ -159,10 +159,14 @@ async function mailListen(template) {
                         if (mail.attachments !== undefined && elem.sender !== null
                             && elem.sender.toLowerCase() === mail.from[0].address.toLowerCase() && (elem.last_date === null ? true : elem.last_date < Date.parse(mail.date))) {
 
-                            mail.attachments.forEach(attach => {
-                                fs.writeFileSync('./attachments/' + attach.fileName, attach.content);
-                                attach.path = fs.realpathSync('./attachments/' + attach.fileName)
-                            });
+                            await Promise.all(mail.attachments.map(attach => {
+                                return new Promise(resolve2 => {
+                                    fs.writeFileSync('./attachments/' + attach.fileName, attach.content);
+                                    attach.path = fs.realpathSync('./attachments/' + attach.fileName);
+                                    attach.content = undefined;
+                                    resolve2();
+                                });
+                            }));
 
                             if (elem.title_filter !== null) {
                                 if (!mail.subject.includes(elem.title_filter)) {
@@ -204,7 +208,7 @@ async function mailListen(template) {
 
                                         let data = fs.readFileSync(filteredAttach[0].path);
 
-                                        JSZip.loadAsync(data).then(function (zip) {
+                                        JSZip.loadAsync(data).then(async function (zip) {
                                             let files = Object.keys(zip.files);
                                             if (files.length > 0) {
 
@@ -212,15 +216,17 @@ async function mailListen(template) {
                                                     fs.mkdirSync(folder);
                                                 }
                                             }
-                                            files.forEach((file) => {
-                                                zip.files[file].async('uint8array').then(async (uint8array) => {
-                                                    if (file.includes(elemFilter)) {
-                                                        template = await writeMail(folder + '\\' + file, uint8array, mail.date, template, elem.id)
-                                                        resolve1();
-                                                    }
+                                            await Promise.all(files.map((file) => {
+                                                return new Promise(resolve2 => {
+                                                    zip.files[file].async('uint8array').then(async (uint8array) => {
+                                                        if (file.includes(elemFilter)) {
+                                                            template = await writeMail(folder + '\\' + file, uint8array, mail.date, template, elem.id)
+                                                            resolve2();
+                                                        }
+                                                    })
                                                 })
-
-                                            })
+                                            }));
+                                            resolve1();
 
                                         });
                                     }
@@ -233,6 +239,8 @@ async function mailListen(template) {
                                     }
                                 }
                             }
+                        } else {
+                            resolve1();
                         }
                     })
                 }))
