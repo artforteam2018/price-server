@@ -864,6 +864,7 @@ io.on('connection', client => {
         checkTokenWs(data)
             .then(result => {
                 if (result.success) {
+                    console.log(data.region.split(','))
                     let queryRules = {
                         text: queries.getTableQuery,
                         values: [data.region.split(',')]
