@@ -619,6 +619,8 @@ app.post('/changeSettings', (req, res) => {
 
                     await Promise.all(req.body.data[rule].map(data => {
                             return new Promise(resolve1 => {
+                                console.log(data.name);
+                                console.log(data.param);
                                 clientPg.query({
                                     text: queries.changeSettingsQuery,
                                     values: [data.param, rule, data.name]
