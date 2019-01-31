@@ -621,13 +621,11 @@ app.post('/changeSettings', (req, res) => {
 
                     await Promise.all(req.body.data[rule].map(data => {
                             return new Promise(resolve1 => {
-                                console.log(data.name);
                                 if (data.name === 'Частота обновления прайсов') {
                                     let interval = intervals.filter(inter => inter.name === 'backInterval')[0];
                                     clearInterval(interval.interval);
                                     interval.interval = setInterval(backInterval, data.param*1000*60);
                                 }
-                                console.log(data.param);
                                 clientPg.query({
                                     text: queries.changeSettingsQuery,
                                     values: [data.param, rule, data.name]
