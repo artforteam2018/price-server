@@ -864,10 +864,9 @@ io.on('connection', client => {
         checkTokenWs(data)
             .then(result => {
                 if (result.success) {
-                    console.log(typeof data.region)
                     let queryRules = {
                         text: queries.getTableQuery,
-                        values: [data.region]
+                        values: [data.region.split(',')]
                     };
                     clientPg.query(queryRules).then(result => {
 
