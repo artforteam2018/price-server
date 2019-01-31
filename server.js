@@ -625,7 +625,7 @@ app.post('/changeSettings', (req, res) => {
                                 if (data.name === 'Частота обновления прайсов') {
                                     let interval = intervals.filter(inter => inter.name === 'backInterval')[0];
                                     clearInterval(interval.interval);
-                                    interval.interval = setInterval(backInterval, data.param);
+                                    interval.interval = setInterval(backInterval, data.param*1000*60);
                                 }
                                 console.log(data.param);
                                 clientPg.query({
