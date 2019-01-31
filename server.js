@@ -34,16 +34,7 @@ let { exec  }= require('child_process');
 clientPg.query({text: queries.getSettings, values: ['Почта с прайсами']})
     .then(result => {
         let freq = result.rows.filter(row => row.name === 'Частота обновления прайсов')[0].param;
-        intervals.push({name: 'main', interval: setInterval(()=>{
-                console.log('Формирование прайсов');
-                exec('node --max_old_space_size=9000 old-back',
-                    function (error, stdout) {
-                        console.log('stdout: ' + stdout);
-                        if (error !== null) {
-                            console.log('exec error: ' + error);
-                        }
-                    });
-            }, freq * 1000 * 60)})
+        intervals.push({name: 'backInterval', interval: setInterval(backInterval, freq * 1000 * 60)})
     });
 
 
@@ -57,6 +48,17 @@ setInterval(()=>{
             }
         });
 }, 15000);
+
+let backInterval = ()=>{
+    console.log('Формирование прайсов');
+    exec('node --max_old_space_size=9000 old-back',
+        function (error, stdout) {
+            console.log('stdout: ' + stdout);
+            if (error !== null) {
+                console.log('exec error: ' + error);
+            }
+        });
+}
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -620,6 +622,11 @@ app.post('/changeSettings', (req, res) => {
                     await Promise.all(req.body.data[rule].map(data => {
                             return new Promise(resolve1 => {
                                 console.log(data.name);
+                                if (data.name === 'Частота обновления прайсов') {
+                                    let interval = intervals.filter(inter => inter.name === 'backInterval')[0];
+                                    clearInterval(interval.interval);
+                                    interval.interval = setInterval(backInterval, data.param);
+                                }
                                 console.log(data.param);
                                 clientPg.query({
                                     text: queries.changeSettingsQuery,
