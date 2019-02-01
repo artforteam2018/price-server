@@ -175,7 +175,7 @@ let receivers_comp = 'Select name, id FROM receivers';
 let sender_comp = 'Select name, id FROM senders';
 let headers_comp = 'Select name, id FROM headers';
 
-let getSendLog = 'SELECT * FROM send_price_log WHERE send_rule =$1 ORDER BY date LIMIT $2';
+let getSendLog = 'SELECT * FROM send_price_log WHERE send_rule =$1 ORDER BY date desc LIMIT $2';
 
 let getUpdateLog = `SELECT update_price_log.date, update_price_log.convert_rule, send
                     FROM update_price_log
