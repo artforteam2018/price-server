@@ -863,13 +863,13 @@ io.on('connection', client => {
     client.on('loadTable', data => {
         checkTokenWs(data)
             .then(result => {
+                console.log(data)
                 if (result.success) {
                     let queryRules = {
                         text: queries.getTableQuery,
                         values: [data.region.split(',')]
                     };
                     clientPg.query(queryRules).then(result => {
-                        console.log(result)
                         setTimeout(()=> {
                             result.rows.forEach(row => {
                                 clientPg.query({
