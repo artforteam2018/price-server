@@ -386,7 +386,7 @@ function buildXlsx(newExcel, resultName) {
             xlsx.buildAsync([{
                 name: "price",
                 data: newExcel
-            }], {}, function (error, xlsBuffer) {
+            }], {compression: true}, function (error, xlsBuffer) {
                 if (!error) {
                     fs.writeFileSync(fs.realpathSync('./ready') + '/' + resultName + '.xlsx', xlsBuffer);
                     console.log('Прайс ' + resultName + ' записан');
