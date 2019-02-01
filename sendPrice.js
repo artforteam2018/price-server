@@ -157,11 +157,12 @@ async function createAndSendMail(receive, readyFolder, receiverList){
         });
 
         let attach = [];
-        let bigXlsx = [{data: []}];
         try {
             await Promise.all(receive.templates.map(async (elem2) => {
-                let smallXlsx = await convertXlsxToArray(readyFolder + elem2 + '.xlsx');
-                bigXlsx[0].data.push.apply(bigXlsx[0].data, smallXlsx[0].data)
+                attach.push({
+                    filename: readyFolder + elem2 + '.xlsx',
+                    content: fs.readFileSync(readyFolder + elem2 + '.xlsx')
+                });
             }));
         } catch (e) {
             clientPg.query({
@@ -169,20 +170,6 @@ async function createAndSendMail(receive, readyFolder, receiverList){
                 values: [receive.id, new Date(), 'error']
             })
         }
-
-        let zip = new JSZip();
-        zip.file(receive.result_name + '.xlsx', await buildXlsx(bigXlsx[0].data));
-
-        let content = await zip.generateAsync({
-            type: "nodebuffer",
-            compression: "DEFLATE",
-            compressionOptions: {level: 9}
-        });
-
-        attach.push({
-            filename: receive.result_name + '.zip',
-            content: content
-        });
 
         let receiversList = receiverList.filter(el => ~receive.receivers.indexOf(el.id));
 
