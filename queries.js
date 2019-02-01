@@ -30,7 +30,7 @@ let getTableQuery = `SELECT rule_name,
                                                         ON send_price_log.date = send_price_log_inner_1.date AND
                                                            send_price_log.send_rule = send_price_log_inner_1.send_rule
                      ) send_price_log_inner_2 ON send_price_log_inner_2.send_rule = id
-                     WHERE removed = false AND (region IN ($1) OR region isnull)
+                     WHERE removed = false AND (region = ANY($1) OR region isnull)
                      GROUP BY rule_name, sender, id, subscribe_to_update, result_name, in_use, intervals, frequency, title, removed`;
 
 let getTableQuery2 = `SELECT rule_name,
