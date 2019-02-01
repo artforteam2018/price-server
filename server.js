@@ -392,9 +392,6 @@ app.post('/changeTable', (req, res) => {
                                         (oldRule[0].frequency.minutes ? (oldRule[0].frequency.minutes + ':') : ('00:')) + '00';
                                 }
 
-                                console.log(JSON.stringify(oldRule[0]))
-                                console.log(JSON.stringify(rule))
-
                                 if (JSON.stringify(oldRule[0]) !== JSON.stringify(rule)) {
                                     let query = {
                                         text: queries.changeTableQuery,
@@ -868,7 +865,6 @@ io.on('connection', client => {
     client.on('loadTable', data => {
         checkTokenWs(data)
             .then(result => {
-                console.log(data)
                 if (result.success) {
                     let queryRules = {
                         text: queries.getTableQuery,

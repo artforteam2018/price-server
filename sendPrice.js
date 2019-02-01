@@ -43,6 +43,30 @@ async function sendPrices() {
                     (receive.frequency.minutes ? receive.frequency.minutes * 60 * 1000 : 0)
             }
 
+            if (receive.send_now) {
+                let query = {
+                    text: queries.changeTableQuery,
+                    values: [
+                        receive.rule_name,
+                        receive.sender,
+                        receive.subscribe_to_update,
+                        receive.result_name,
+                        receive.in_use,
+                        receive.intervals,
+                        receive.frequency,
+                        receive.title,
+                        receive.region,
+                        false,
+                        receive.removed,
+                        receive.id
+                    ]
+                };
+                clientPg.query(query)
+                    .then(async ()=>{
+                        await createAndSendMail(receive, readyFolder, receiverList);
+                    })
+            }
+
             if (receive.subscribe_to_update) {
                     let toUpdate = false;
                 await Promise.all(receive.templates_id.map((template) => {
