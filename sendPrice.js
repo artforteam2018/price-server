@@ -43,7 +43,6 @@ async function sendPrices() {
                     (receive.frequency.minutes ? receive.frequency.minutes * 60 * 1000 : 0)
             }
 
-            console.log(receive.send_now)
             if (receive.send_now) {
                 await new Promise(resolve1 => {
                     let query = {
@@ -73,7 +72,6 @@ async function sendPrices() {
                             resolve1();
                         })
                 })
-                }
             }
 
             if (receive.subscribe_to_update) {
