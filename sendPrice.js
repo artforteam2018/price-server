@@ -160,7 +160,7 @@ async function createAndSendMail(receive, readyFolder, receiverList){
         try {
             await Promise.all(receive.templates.map(async (elem2) => {
                 attach.push({
-                    filename: readyFolder + elem2 + '.xlsx',
+                    filename: elem2 + '.xlsx',
                     content: fs.readFileSync(readyFolder + elem2 + '.xlsx')
                 });
             }));
