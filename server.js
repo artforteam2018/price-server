@@ -393,7 +393,7 @@ app.post('/changeTable', (req, res) => {
                                 }
 
                                 console.log(JSON.stringify(oldRule[0]))
-                                console.log(JSON.stringify(rule[0]))
+                                console.log(JSON.stringify(rule))
 
                                 if (JSON.stringify(oldRule[0]) !== JSON.stringify(rule)) {
                                     let query = {
