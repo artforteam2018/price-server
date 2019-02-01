@@ -8,6 +8,7 @@ let getTableQuery = `SELECT rule_name,
                             frequency,
                             title,
                             region,
+                            send_now,
                             MAX(date),
                             array(select t.id AS template
                                   from send_rules_templates
@@ -43,6 +44,7 @@ let getTableQuery2 = `SELECT rule_name,
                             frequency,
                             title,
                             region,
+                            send_now,
                              array(select t.id AS template
                                    from send_rules_templates
                                           LEFT JOIN convert_rules t ON send_rules_templates.convert_rule = t.id
@@ -76,6 +78,7 @@ let getTableQuery3 = `SELECT rule_name,
                              frequency,
                              title,
                              date,
+                             send_now,
                              array(select t.name AS template
                                    from send_rules_templates
                                           LEFT JOIN convert_rules t ON send_rules_templates.convert_rule = t.id
@@ -98,9 +101,9 @@ let getTableQuery3 = `SELECT rule_name,
                       WHERE removed = false
 `;
 
-let changeTableQuery = 'UPDATE public.send_rules SET rule_name = $1, sender = $2, subscribe_to_update =$3, result_name =$4, in_use =$5, intervals =$6, frequency =$7, title =$8, region =$9, removed =$10 WHERE id = $11';
+let changeTableQuery = 'UPDATE public.send_rules SET rule_name = $1, sender = $2, subscribe_to_update =$3, result_name =$4, in_use =$5, intervals =$6, frequency =$7, title =$8, region =$9, send_now =$10, removed =$11 WHERE id = $12';
 
-let insertTableQuery = 'INSERT INTO public.send_rules(rule_name, sender, subscribe_to_update, result_name, in_use, intervals, frequency, title, removed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id';
+let insertTableQuery = 'INSERT INTO public.send_rules(rule_name, sender, subscribe_to_update, result_name, in_use, intervals, frequency, title, send_now, removed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id';
 
 let getRulesQuery = `SELECT convert_rules.name AS name,
                             sender,

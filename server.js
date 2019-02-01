@@ -392,6 +392,9 @@ app.post('/changeTable', (req, res) => {
                                         (oldRule[0].frequency.minutes ? (oldRule[0].frequency.minutes + ':') : ('00:')) + '00';
                                 }
 
+                                console.log(JSON.stringify(oldRule[0])
+                                console.log(JSON.stringify(rule[0])
+
                                 if (JSON.stringify(oldRule[0]) !== JSON.stringify(rule)) {
                                     let query = {
                                         text: queries.changeTableQuery,
@@ -405,6 +408,7 @@ app.post('/changeTable', (req, res) => {
                                             rule.frequency,
                                             rule.title,
                                             rule.region,
+                                            rule.send_now,
                                             rule.removed,
                                             rule.id
                                         ]
@@ -472,6 +476,7 @@ app.post('/changeTable', (req, res) => {
                                         rule.intervals,
                                         rule.frequency,
                                         rule.title,
+                                        rule.send_now,
                                         false
                                     ]
                                 };
