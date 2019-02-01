@@ -66,6 +66,9 @@ async function sendPrices() {
                     .then(async ()=>{
                         await createAndSendMail(receive, readyFolder, receiverList);
                     })
+                    .catch(reason => {
+                        console.log(reason)
+                    })
             }
 
             if (receive.subscribe_to_update) {
