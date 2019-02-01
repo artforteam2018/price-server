@@ -45,30 +45,35 @@ async function sendPrices() {
 
             console.log(receive.send_now)
             if (receive.send_now) {
-                let query = {
-                    text: queries.changeTableQuery,
-                    values: [
-                        receive.rule_name,
-                        receive.sender,
-                        receive.subscribe_to_update,
-                        receive.result_name,
-                        receive.in_use,
-                        receive.intervals,
-                        receive.frequency,
-                        receive.title,
-                        receive.region,
-                        false,
-                        receive.removed,
-                        receive.id
-                    ]
-                };
-                clientPg.query(query)
-                    .then(async ()=>{
-                        await createAndSendMail(receive, readyFolder, receiverList);
-                    })
-                    .catch(reason => {
-                        console.log(reason)
-                    })
+                await new Promise(resolve1 => {
+                    let query = {
+                        text: queries.changeTableQuery,
+                        values: [
+                            receive.rule_name,
+                            receive.sender,
+                            receive.subscribe_to_update,
+                            receive.result_name,
+                            receive.in_use,
+                            receive.intervals,
+                            receive.frequency,
+                            receive.title,
+                            receive.region,
+                            false,
+                            receive.removed,
+                            receive.id
+                        ]
+                    };
+                    clientPg.query(query)
+                        .then(async () => {
+                            await createAndSendMail(receive, readyFolder, receiverList);
+                            resolve1();
+                        })
+                        .catch(reason => {
+                            console.log(reason);
+                            resolve1();
+                        })
+                })
+                }
             }
 
             if (receive.subscribe_to_update) {
