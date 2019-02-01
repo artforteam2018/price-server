@@ -43,6 +43,7 @@ async function sendPrices() {
                     (receive.frequency.minutes ? receive.frequency.minutes * 60 * 1000 : 0)
             }
 
+            console.log(receive.send_now)
             if (receive.send_now) {
                 let query = {
                     text: queries.changeTableQuery,
