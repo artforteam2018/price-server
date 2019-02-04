@@ -915,4 +915,5 @@ function convertDBQueryToArray(query) {
     })
 }
 
-main();
+module.exports.main = main;
+module.exports.makeFormula = makeFormula;

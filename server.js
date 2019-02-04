@@ -52,7 +52,7 @@ setInterval(()=>{
 
 let backInterval = ()=>{
     console.log('Формирование прайсов');
-    exec('node --max_old_space_size=9000 old-back',
+    exec('npm run old-back',
         function (error, stdout) {
             console.log('stdout: ' + stdout);
             if (error !== null) {
