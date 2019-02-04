@@ -224,6 +224,7 @@ app.get('/getTemplates', (req, res) => {
 app.post('/getOneRow', (req, res) => {
     checkToken(req)
         .then(() => {
+            console.log(req.body.rule)
             clientPg.query({text: queries.getRuleById, values: [req.body.rule]})
                 .then(res => {
                     console.log(res.rows)
