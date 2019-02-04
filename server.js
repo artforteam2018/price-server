@@ -226,11 +226,11 @@ app.post('/getOneRow', (req, res) => {
     checkToken(req)
         .then(() => {
             clientPg.query({text: queries.getRuleById, values: [req.body.data.rule]})
-                .then(async res => {
+                .then(async result => {
 
-                    let ObjectXls = xlsxConverter.readFile(res.rows[0].source);
+                    let ObjectXls = xlsxConverter.readFile(result.rows[0].source);
                     let oneRowKeys = Object.keys(ObjectXls.Sheets[ObjectXls.SheetNames[0]]).filter(key => key.match(/[A-Z]10$/g) !== null);
-                    res.send(oneRowKeys.map(key => ObjectXls.Sheets[ObjectXls.SheetNames[0]][key].v));
+                    res.send({data: oneRowKeys.map(key => ObjectXls.Sheets[ObjectXls.SheetNames[0]][key].v)});
                 })
         })
 });
