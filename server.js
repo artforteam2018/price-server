@@ -216,7 +216,7 @@ app.get('/getTemplates', (req, res) => {
         .then(() => {
             clientPg.query(queries.getRulesQuery)
                 .then(result => {
-                    res.send(result)
+                    res.send(result.rows)
                 })
                 .catch(reason => console.log(reason))
         })
