@@ -216,6 +216,8 @@ let adminQuery = 'SELECT * FROM users WHERE username = $1';
 
 let getRegion = 'SELECT region FROM users WHERE username = $1';
 
+let getRuleById = 'SELECT * FROM convert_rules WHERE id = $1';
+
 module.exports.getTableQuery = getTableQuery;
 module.exports.getTableQuery2 = getTableQuery2;
 module.exports.getTableQuery3 = getTableQuery3;
@@ -275,3 +277,5 @@ module.exports.changeSettingsQuery = changeSettingsQuery;
 
 module.exports.adminQuery = adminQuery;
 module.exports.getRegion = getRegion;
+
+module.exports.getRuleById = getRuleById;
