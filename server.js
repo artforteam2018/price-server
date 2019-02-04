@@ -221,6 +221,13 @@ app.get('/getTemplates', (req, res) => {
         })
 });
 
+app.post('/getOneRow', (req, res) => {
+    checkToken(req)
+        .then(() => {
+            console.log(JSON.stringify(req.body))
+        })
+});
+
 app.post('/changeTemplates', (req, res) => {
     checkToken(req)
         .then(() => {
