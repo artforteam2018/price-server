@@ -227,6 +227,7 @@ app.post('/getOneRow', (req, res) => {
         .then(() => {
             clientPg.query({text: queries.getRuleById, values: [req.body.data.rule]})
                 .then(async res => {
+                    console.log(res.rows[0].source)
                     let xlsxRes = await convertXlsxToArray(res.rows[0].source);
                         console.log(xlsxRes[0].data)
                 })
