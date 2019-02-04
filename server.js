@@ -5,7 +5,7 @@ const {Client} = require('pg');
 const scrypt = require('scrypt');
 const crypto = require("crypto");
 const sha512 = require("js-sha512");
-const xlsx = require('xlsx');
+const xlsx = require('async-xlsx');
 const sol = 'z7qlO?cncUIurNn}BaA}nrPoW5D6r~s9JHIyPoYblVS$qe~%~ZmT?HC7{3%pm43f' +
     'Ajkm02eLPog6F~|RAARKIMzT8DR@Yly~ePHHuSmFDy?t1lE64fWm1%~SJGYHQw6C' +
     '8}R?hCR2SJMnOF4iQrQo0CYlg$iX$GoHRmOLW09eO0C~O6wVeyyz5QjlZi5$id$?' +
