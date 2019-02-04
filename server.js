@@ -229,7 +229,8 @@ app.post('/getOneRow', (req, res) => {
                 .then(async res => {
 
                     let ObjectXls = xlsxConverter.readFile(res.rows[0].source);
-                        console.log(ObjectXls)
+                    let oneRowKeys = Object.keys(ObjectXls.Sheets[ObjectXls.SheetNames[0]]).filter(key => key.match(/[A-Z]10$/g) !== null);
+                    res.send(oneRowKeys.map(key => ObjectXls.Sheets[ObjectXls.SheetNames[0]][key].v));
                 })
         })
 });

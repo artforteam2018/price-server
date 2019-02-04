@@ -368,6 +368,8 @@ function buildXlsx(newExcel, resultName) {
                     }], {}, function (error, xlsBuffer) {
                         if (!error) {
                             fs.writeFileSync(fs.realpathSync('./ready') + '/' + resultName + '.xlsx', xlsBuffer);
+                            let ObjectXls = xlsxConverter.readFile(fs.realpathSync('./ready') + '/' + resultName + '.xlsx');
+                            xlsxConverter.writeFile(ObjectXls, fs.realpathSync('./ready') + '/' + resultName + '.xlsx', {compression: true})
                             console.log('Прайс ' + resultName + ' записан');
                             resolve()
                         } else {
@@ -384,6 +386,8 @@ function buildXlsx(newExcel, resultName) {
             }], {}, function (error, xlsBuffer) {
                 if (!error) {
                     fs.writeFileSync(fs.realpathSync('./ready') + '/' + resultName + '.xlsx', xlsBuffer);
+                    let ObjectXls = xlsxConverter.readFile(fs.realpathSync('./ready') + '/' + resultName + '.xlsx');
+                    xlsxConverter.writeFile(ObjectXls, fs.realpathSync('./ready') + '/' + resultName + '.xlsx', {compression: true})
                     console.log('Прайс ' + resultName + ' записан');
                     resolve()
                 } else {
