@@ -326,18 +326,13 @@ function convertTxtToArray(path) {
 
 function convertXlsxToArray(path) {
     return new Promise((resolve) => {
-
         xlsx.parseFileAsync(path, {}, (parsedObject) => {
             if (parsedObject) {
 
                 resolve(parsedObject)
-
             }
         })
-
     })
-
-
 }
 
 
