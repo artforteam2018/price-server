@@ -226,7 +226,7 @@ app.post('/getOneRow', (req, res) => {
         .then(() => {
             clientPg.query({text: queries.getRuleById, values: [req.body.rule]})
                 .then(res => {
-                    console.log(res.rows[0])
+                    console.log(res.rows)
                 })
         })
 });
