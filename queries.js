@@ -180,13 +180,25 @@ let headers_comp = 'Select name, id FROM headers';
 
 let getSendLog = 'SELECT * FROM send_price_log WHERE send_rule =$1 ORDER BY date desc LIMIT $2';
 
-let getUpdateLog = `SELECT update_price_log.date, update_price_log.convert_rule, send
+let getLastUpdate = `SELECT update_price_log.date, update_price_log.convert_rule, send
                     FROM update_price_log
                            RIGHT JOIN (SELECT MAX(date) AS date, convert_rule
                                        FROM update_price_log
                                        WHERE convert_rule = (SELECT id FROM convert_rules WHERE template = $1 LIMIT 1)
                                        GROUP BY convert_rule) t ON t.convert_rule = update_price_log.convert_rule AND
                                                                    t.date = update_price_log.date
+                                                                   ORDER BY date desc LIMIT $2
+`;
+
+let getUpdateLog = `SELECT *
+                    FROM update_price_log
+                    WHERE convert_rule = (
+                      SELECT convert_rule
+                      FROM send_rules_templates
+                      WHERE send_rule = $1
+                      LIMIT 1)
+                    ORDER BY date desc
+                    LIMIT $2
 `;
 
 let updateUpdateLog = 'UPDATE update_price_log SET send = $3 WHERE convert_rule = $1 AND date = $2';
@@ -265,6 +277,7 @@ module.exports.headers_comp = headers_comp;
 module.exports.getSendLog = getSendLog;
 module.exports.insertSendLog = insertSendLog;
 module.exports.changeSendLog = changeSendLog;
+module.exports.getLastUpdate = getLastUpdate;
 module.exports.getUpdateLog = getUpdateLog;
 module.exports.updateUpdateLog = updateUpdateLog;
 module.exports.deleteSendTemplates = deleteSendTemplates;

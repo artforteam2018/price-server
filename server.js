@@ -21,6 +21,8 @@ let intervals = [];
 
 //const oldBack = require('./old-back');
 const queries = require('./queries');
+const formula_lib = require('./lib/makeFormula');
+
 const clientPg = new Client({
     host: 'localhost',
     port: 5432,
@@ -52,7 +54,7 @@ setInterval(()=>{
 
 let backInterval = ()=>{
     console.log('Формирование прайсов');
-    exec('npm run old-back',
+    exec('node --max_old_space_size=9000 old-back.js',
         function (error, stdout) {
             console.log('stdout: ' + stdout);
             if (error !== null) {
@@ -230,7 +232,30 @@ app.post('/getOneRow', (req, res) => {
 
                     let ObjectXls = xlsxConverter.readFile(result.rows[0].source);
                     let oneRowKeys = Object.keys(ObjectXls.Sheets[ObjectXls.SheetNames[0]]).filter(key => key.match(/[A-Z]10$/g) !== null);
-                    res.send({data: oneRowKeys.map(key => ObjectXls.Sheets[ObjectXls.SheetNames[0]][key].v)});
+
+                    let elem = oneRowKeys.map(key => ObjectXls.Sheets[ObjectXls.SheetNames[0]][key].v);
+
+                    let oneRowAnswer = await Promise.all(req.body.data.item.map(async item => {
+                        try {
+                            let formula = eval((await formula_lib.makeFormula(item, elem)).replace(/\r/g, '').replace(/\n/g, ''))
+
+                            if (result.rows[0].name === 'CHERY' && typeof (formula) === "string") {
+                                formula = iconv.decode(iconv.encode(new Buffer(formula), "cp1252"), "cp1251")
+                            }
+
+                            if (typeof (formula) === "number") {
+                                formula = parseFloat(formula.toFixed(2))
+                            }
+                            if (parseInt(formula) == formula) {
+                                formula = parseInt(formula)
+                            }
+
+                            return formula;
+                        } catch (e) {
+                            return 'ошибка'
+                        }
+                    }));
+                    res.send({data: oneRowAnswer});
                 })
         })
 });
@@ -669,6 +694,20 @@ app.post('/getSendLog', (req, res) => {
         .then(() => {
             clientPg.query({
                 text: queries.getSendLog,
+                values: [req.body.rule, req.body.columns]
+            })
+                .then(result => {
+                    res.send(result.rows)
+                })
+                .catch(reason => console.log(reason))
+        })
+});
+
+app.post('/getUpdateLog', (req, res) => {
+    checkToken(req)
+        .then(() => {
+            clientPg.query({
+                text: queries.getUpdateLog,
                 values: [req.body.rule, req.body.columns]
             })
                 .then(result => {

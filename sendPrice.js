@@ -78,7 +78,7 @@ async function sendPrices() {
                     let toUpdate = false;
                 await Promise.all(receive.templates_id.map((template) => {
                     return new Promise(resolve1 => {
-                        clientPg.query({text: queries.getUpdateLog, values: [template]})
+                        clientPg.query({text: queries.getLastUpdate, values: [template]})
                             .then(async result => {
                                 await Promise.all(result.rows.map(res => {
                                     return new Promise(resolve2 => {
