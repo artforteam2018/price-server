@@ -8,6 +8,7 @@ let getTableQuery = `SELECT rule_name,
                             frequency,
                             title,
                             region,
+                            groups,
                             send_now,
                             MAX(date),
                             array(select t.id AS template
@@ -44,6 +45,7 @@ let getTableQuery2 = `SELECT rule_name,
                             frequency,
                             title,
                             region,
+                             groups,
                             send_now,
                              array(select t.id AS template
                                    from send_rules_templates
@@ -77,6 +79,8 @@ let getTableQuery3 = `SELECT rule_name,
                              intervals,
                              frequency,
                              title,
+                             region,
+                             groups,
                              date,
                              send_now,
                              array(select t.name AS template
@@ -101,7 +105,7 @@ let getTableQuery3 = `SELECT rule_name,
                       WHERE removed = false
 `;
 
-let changeTableQuery = 'UPDATE public.send_rules SET rule_name = $1, sender = $2, subscribe_to_update =$3, result_name =$4, in_use =$5, intervals =$6, frequency =$7, title =$8, region =$9, send_now =$10, removed =$11 WHERE id = $12';
+let changeTableQuery = 'UPDATE public.send_rules SET rule_name = $1, sender = $2, subscribe_to_update =$3, result_name =$4, in_use =$5, intervals =$6, frequency =$7, title =$8, region =$9, groups = $10, send_now =$11, removed =$12 WHERE id = $13';
 
 let insertTableQuery = 'INSERT INTO public.send_rules(rule_name, sender, subscribe_to_update, result_name, in_use, intervals, frequency, title, send_now, removed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id';
 
@@ -222,8 +226,9 @@ VALUES ($1, $2)`;
 let getSettings = `SELECT * FROM SETTINGS WHERE folder = $1`;
 
 let getSettingsQuery = `SELECT * FROM SETTINGS ORDER BY id`;
+let getUserSettingsQuery = `SELECT region FROM users WHERE username = $1 ORDER BY id`;
 let changeSettingsQuery = 'UPDATE settings SET param = $1 WHERE folder = $2 AND name = $3';
-
+let changeUserSettingsQuery = 'UPDATE users SET region = $1 WHERE username = $2';
 let adminQuery = 'SELECT * FROM users WHERE username = $1';
 
 let getRegion = 'SELECT region FROM users WHERE username = $1';
@@ -286,7 +291,9 @@ module.exports.insertSendTemplates = insertSendTemplates;
 module.exports.insertSendReceivers = insertSendReceivers;
 module.exports.getSettings = getSettings;
 module.exports.getSettingsQuery = getSettingsQuery;
+module.exports.getUserSettingsQuery = getUserSettingsQuery;
 module.exports.changeSettingsQuery = changeSettingsQuery;
+module.exports.changeUserSettingsQuery = changeUserSettingsQuery;
 
 module.exports.adminQuery = adminQuery;
 module.exports.getRegion = getRegion;

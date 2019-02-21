@@ -6,6 +6,9 @@ const scrypt = require('scrypt');
 const crypto = require("crypto");
 const sha512 = require("js-sha512");
 const xlsxConverter = require('xlsx'); //нормальная либа экселя
+const request = require('request');
+const {exec} = require('child_process');
+
 const sol = 'z7qlO?cncUIurNn}BaA}nrPoW5D6r~s9JHIyPoYblVS$qe~%~ZmT?HC7{3%pm43f' +
     'Ajkm02eLPog6F~|RAARKIMzT8DR@Yly~ePHHuSmFDy?t1lE64fWm1%~SJGYHQw6C' +
     '8}R?hCR2SJMnOF4iQrQo0CYlg$iX$GoHRmOLW09eO0C~O6wVeyyz5QjlZi5$id$?' +
@@ -17,11 +20,12 @@ const sol = 'z7qlO?cncUIurNn}BaA}nrPoW5D6r~s9JHIyPoYblVS$qe~%~ZmT?HC7{3%pm43f' +
     'eniuAX4BNM5D0JgrepD#XJ$Gy}j27OPldUj4jrZ4a6s?|?1VHZJdNWoKCEgqFFNf' +
     '3X#1NLcA{@}6W6##pV62H~~%aWqxoNG9I7Lkcuw*|71ww|w@AhyzhRiCsFk|i{0n';
 
-let intervals = [];
-
-//const oldBack = require('./old-back');
 const queries = require('./queries');
 const formula_lib = require('./lib/makeFormula');
+
+let intervals = [];
+let CBUrl = '';
+let CBCurrencies;
 
 const clientPg = new Client({
     host: 'localhost',
@@ -32,16 +36,15 @@ const clientPg = new Client({
 });
 clientPg.connect(null, null);
 
-let { exec  }= require('child_process');
-
 clientPg.query({text: queries.getSettings, values: ['Почта с прайсами']})
     .then(result => {
+        CBUrl = result.rows.filter(row => row.name === 'Курсы валют')[0].param;
         let freq = result.rows.filter(row => row.name === 'Частота обновления прайсов')[0].param;
         intervals.push({name: 'backInterval', interval: setInterval(backInterval, freq * 1000 * 60)})
     });
 
 
-setInterval(()=>{
+setInterval(() => {
     console.log('Рассылка прайсов');
     exec('node sendPrice.js',
         function (error, stdout) {
@@ -52,9 +55,9 @@ setInterval(()=>{
         });
 }, 15000);
 
-let backInterval = ()=>{
+let backInterval = () => {
     console.log('Формирование прайсов');
-    exec('node --max_old_space_size=9000 old-back.js',
+    exec('node old-back.js',
         function (error, stdout) {
             console.log('stdout: ' + stdout);
             if (error !== null) {
@@ -226,7 +229,20 @@ app.get('/getTemplates', (req, res) => {
 
 app.post('/getOneRow', (req, res) => {
     checkToken(req)
-        .then(() => {
+        .then(async () => {
+
+            await new Promise(resolve => {
+                request({
+                    method: 'GET',
+                    url: CBUrl,
+                }, function (error, response, body) {
+                    if (!error && response.statusCode === 200) {
+                        CBCurrencies = JSON.parse(body).Valute;
+                    }
+                    resolve();
+                });
+            });
+
             clientPg.query({text: queries.getRuleById, values: [req.body.data.rule]})
                 .then(async result => {
 
@@ -237,7 +253,7 @@ app.post('/getOneRow', (req, res) => {
 
                     let oneRowAnswer = await Promise.all(req.body.data.item.map(async item => {
                         try {
-                            let formula = eval((await formula_lib.makeFormula(item, elem)).replace(/\r/g, '').replace(/\n/g, ''))
+                            let formula = eval((await formula_lib.makeFormula(item, elem, CBCurrencies)).replace(/\r/g, '').replace(/\n/g, ''))
 
                             if (result.rows[0].name === 'CHERY' && typeof (formula) === "string") {
                                 formula = iconv.decode(iconv.encode(new Buffer(formula), "cp1252"), "cp1251")
@@ -444,6 +460,7 @@ app.post('/changeTable', (req, res) => {
                                             rule.frequency,
                                             rule.title,
                                             rule.region,
+                                            rule.groups,
                                             rule.send_now,
                                             rule.removed,
                                             rule.id
@@ -466,8 +483,11 @@ app.post('/changeTable', (req, res) => {
                                         .then(async () => {
                                             await Promise.all(rule.templates.map(temp => {
                                                 return new Promise(resolve1 => {
-                                                    clientPg.query({text: queries.insertSendTemplates, values: [rule.id, temp]})
-                                                        .then(()=>{
+                                                    clientPg.query({
+                                                        text: queries.insertSendTemplates,
+                                                        values: [rule.id, temp]
+                                                    })
+                                                        .then(() => {
                                                             resolve1();
                                                         })
                                                         .catch((reason => {
@@ -478,8 +498,11 @@ app.post('/changeTable', (req, res) => {
                                             }));
                                             await Promise.all(rule.receivers.map(temp => {
                                                 return new Promise(resolve1 => {
-                                                    clientPg.query({text: queries.insertSendReceivers, values: [rule.id, temp]})
-                                                        .then(()=>{
+                                                    clientPg.query({
+                                                        text: queries.insertSendReceivers,
+                                                        values: [rule.id, temp]
+                                                    })
+                                                        .then(() => {
                                                             resolve1();
                                                         })
                                                         .catch((reason => {
@@ -520,8 +543,11 @@ app.post('/changeTable', (req, res) => {
                                     .then(async result => {
                                         await Promise.all(rule.templates.map(temp => {
                                             return new Promise(resolve1 => {
-                                                clientPg.query({text: queries.insertSendTemplates, values: [result.rows[0].id, temp]})
-                                                    .then(()=>{
+                                                clientPg.query({
+                                                    text: queries.insertSendTemplates,
+                                                    values: [result.rows[0].id, temp]
+                                                })
+                                                    .then(() => {
                                                         resolve1();
                                                     })
                                                     .catch((reason => {
@@ -532,8 +558,11 @@ app.post('/changeTable', (req, res) => {
                                         }));
                                         await Promise.all(rule.receivers.map(temp => {
                                             return new Promise(resolve1 => {
-                                                clientPg.query({text: queries.insertSendReceivers, values: [result.rows[0].id, temp]})
-                                                    .then(()=>{
+                                                clientPg.query({
+                                                    text: queries.insertSendReceivers,
+                                                    values: [result.rows[0].id, temp]
+                                                })
+                                                    .then(() => {
                                                         resolve1();
                                                     })
                                                     .catch((reason => {
@@ -654,6 +683,21 @@ app.get('/getSettings', (req, res) => {
         })
 });
 
+app.post('/getUserSettings', (req, res) => {
+    checkToken(req)
+        .then(() => {
+            clientPg.query({
+                text: queries.getUserSettingsQuery, values: [req.body.data
+                ]
+            })
+                .then(result => {
+                    res.send(result.rows)
+                })
+                .catch(reason => console.log(reason))
+        })
+});
+
+
 app.post('/changeSettings', (req, res) => {
     checkToken(req)
         .then(async () => {
@@ -665,7 +709,7 @@ app.post('/changeSettings', (req, res) => {
                                 if (data.name === 'Частота обновления прайсов') {
                                     let interval = intervals.filter(inter => inter.name === 'backInterval')[0];
                                     clearInterval(interval.interval);
-                                    interval.interval = setInterval(backInterval, data.param*1000*60);
+                                    interval.interval = setInterval(backInterval, data.param * 1000 * 60);
                                 }
                                 clientPg.query({
                                     text: queries.changeSettingsQuery,
@@ -687,6 +731,28 @@ app.post('/changeSettings', (req, res) => {
             }));
             res.send({success: true})
         })
+});
+
+app.post('/changeUserSettings', (req, res) => {
+    checkToken(req)
+        .then(async () => {
+            return new Promise(async resolve => {
+
+                clientPg.query({
+                    text: queries.changeUserSettingsQuery,
+                    values: [req.body.data.region, req.body.username]
+                })
+                    .then(() => {
+                        resolve()
+                    })
+                    .catch(reason => {
+                            console.log(reason);
+                            resolve();
+                        }
+                    );
+            })
+        })
+    res.send({success: true})
 });
 
 app.post('/getSendLog', (req, res) => {
@@ -843,63 +909,63 @@ app.post('/auth', (req, res) => {
 app.post('/reg', async (req, res) => {
     let adminPass = false;
 
-        let adminRes = await clientPg.query({text: queries.adminQuery, values: ['admin']});
+    let adminRes = await clientPg.query({text: queries.adminQuery, values: ['admin']});
 
-        await Promise.all(adminRes.rows.map(row => {
-            return new Promise(resolve => {
-                scrypt.verifyKdf(Buffer.from(row.pwd_hash, 'base64'), req.body.admin_password + sol)
-                    .then((result)=>{
-                        if (result) {
-                            adminPass = true;
-                        }
-                        resolve();
-                    })
-                    .catch((reason)=>{
-                        console.log(reason);
-                        resolve();
-                    })
-            });
-        }));
-
-
-        if (adminPass) {
-            let queryIdentify = {
-                text: queries.getUsersQuery,
-                values: [req.body.username]
-            };
-            clientPg.query(queryIdentify)
-                .then(result => {
-                    if (result.rows.length > 0) {
-                        res.send({success: false, type: 409})
-                    } else {
-                        scrypt.kdf(req.body.password + sol, {N: 16, r: 1, p: 1}, function (err, result) {
-                            let password = result.toString("base64");
-                            if (req.body.username.length > 0 && password.length > 0) {
-                                let queryRegister = {
-                                    text: queries.insertUsersQuery,
-                                    values: [req.body.username, password, req.body.region],
-                                };
-
-                                clientPg.query(queryRegister)
-                                    .then(
-                                        function () {
-                                            res.send({success: true, type: 200})
-                                        }, function (err) {
-                                            res.send({success: false, type: 500});
-                                            console.log(err)
-                                        });
-                            } else {
-                                res.send({success: false, type: 500});
-                            }
-                        });
+    await Promise.all(adminRes.rows.map(row => {
+        return new Promise(resolve => {
+            scrypt.verifyKdf(Buffer.from(row.pwd_hash, 'base64'), req.body.admin_password + sol)
+                .then((result) => {
+                    if (result) {
+                        adminPass = true;
                     }
-                }, err => {
-                    console.log(err);
-                    res.send({success: false, type: 500})
+                    resolve();
                 })
-        } else {
-            res.send({success: false, type: 500})
-        }
+                .catch((reason) => {
+                    console.log(reason);
+                    resolve();
+                })
+        });
+    }));
+
+
+    if (adminPass) {
+        let queryIdentify = {
+            text: queries.getUsersQuery,
+            values: [req.body.username]
+        };
+        clientPg.query(queryIdentify)
+            .then(result => {
+                if (result.rows.length > 0) {
+                    res.send({success: false, type: 409})
+                } else {
+                    scrypt.kdf(req.body.password + sol, {N: 16, r: 1, p: 1}, function (err, result) {
+                        let password = result.toString("base64");
+                        if (req.body.username.length > 0 && password.length > 0) {
+                            let queryRegister = {
+                                text: queries.insertUsersQuery,
+                                values: [req.body.username, password, req.body.region],
+                            };
+
+                            clientPg.query(queryRegister)
+                                .then(
+                                    function () {
+                                        res.send({success: true, type: 200})
+                                    }, function (err) {
+                                        res.send({success: false, type: 500});
+                                        console.log(err)
+                                    });
+                        } else {
+                            res.send({success: false, type: 500});
+                        }
+                    });
+                }
+            }, err => {
+                console.log(err);
+                res.send({success: false, type: 500})
+            })
+    } else {
+        res.send({success: false, type: 500})
+    }
 });
 
 app.use(function (req, res, next) {
@@ -924,30 +990,46 @@ io.on('connection', client => {
                         values: [data.region.split(',')]
                     };
                     clientPg.query(queryRules).then(result => {
-                        setTimeout(()=> {
+                        setTimeout(() => {
                             result.rows.forEach(row => {
                                 clientPg.query({
                                     text: queries.getSendLog,
                                     values: [row.id, 4]
                                 })
                                     .then(result => {
-                                        io.to(data.token).emit('updateSendLog', {log: result.rows.map(row => ({date: row.date.getTime(), info: row.info, send_rule: row.send_rule, success: row.success}))});
+                                        io.to(data.token).emit('updateSendLog', {
+                                            log: result.rows.map(row => ({
+                                                date: row.date.getTime(),
+                                                info: row.info,
+                                                send_rule: row.send_rule,
+                                                success: row.success
+                                            }))
+                                        });
                                     });
                             });
                         }, 200);
 
 
-                        intervals.push({name: data.token , interval: setInterval(() => {
+                        intervals.push({
+                            name: data.token, interval: setInterval(() => {
                                 result.rows.forEach(row => {
                                     clientPg.query({
                                         text: queries.getSendLog,
                                         values: [row.id, 4]
                                     })
                                         .then(result => {
-                                            io.to(data.token).emit('updateSendLog', {log: result.rows.map(row => ({date: row.date.getTime(), info: row.info, send_rule: row.send_rule, success: row.success}))});
+                                            io.to(data.token).emit('updateSendLog', {
+                                                log: result.rows.map(row => ({
+                                                    date: row.date.getTime(),
+                                                    info: row.info,
+                                                    send_rule: row.send_rule,
+                                                    success: row.success
+                                                }))
+                                            });
                                         });
                                 })
-                            }, 30 * 1000)});
+                            }, 30 * 1000)
+                        });
                         result.rows.forEach(res => {
                             res.intervals = res.intervals.map(inter => {
                                 return Date.parse(inter)

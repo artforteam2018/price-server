@@ -11,8 +11,9 @@ const nodemailer = require('nodemailer'); //прослушка почты
 const req = require('request');
 const emlformat = require('eml-format'); //Для работы с eml
 const notifier = require('mail-notifier');
-
 const formula_lib = require('./lib/makeFormula');
+let CBUrl = '';
+let CBCurrencies;
 
 const clientPg = new Client({
     host: 'localhost',
@@ -30,6 +31,7 @@ clientPg.query({
     values: ['Почта с прайсами']
 })
     .then(result => {
+        CBUrl = result.rows.filter(row => row.name === 'Курсы валют')[0].param;
         const imap = {
             user: result.rows.filter(row => row.name === 'Имя пользователя')[0].param,
             password: result.rows.filter(row => row.name === 'Пароль')[0].param,
@@ -87,6 +89,20 @@ function mergeArrays(a1, a2, propLeft, propRight, newLeft, newRight) {
 }
 
 async function main() {
+
+
+    await new Promise(resolve => {
+        req({
+            method: 'GET',
+            url: CBUrl,
+        }, function (error, response, body) {
+            if (!error && response.statusCode === 200) {
+                CBCurrencies = JSON.parse(body).Valute;
+            }
+            resolve();
+        });
+    });
+
     let query = `SELECT convert_rules.id,
                         sender,
                         t.pseudoname AS outer_name,
@@ -109,10 +125,11 @@ async function main() {
     `;
 
     let template = await convertDBQueryToArray(query);
-    await mailListen(template);
+    //await mailListen(template);
     await gmMakeRequest(template);
 
     template = await convertDBQueryToArray(query);
+
     await makePrices(template);
     clientPg.end();
     return 0;
@@ -340,16 +357,16 @@ function convertXlsxToArray(path) {
 }
 
 
-function buildXlsx(newExcel, resultName) {
+function buildXlsx(newExcel, resultName, path) {
     return new Promise(async resolve => {
 
-        if (resultName === 'УАЗ ЦС') {
+        if (path.includes('uaz-email')) {
             let text = `truncate table uaz1_add0;
             INSERT INTO uaz1_add0 VALUES`;
             for (let i = 0; i < newExcel.length; i++) {
                 text += '(';
                 for (let j = 0; j < newExcel[i].length; j++) {
-                    if (newExcel[i][j] === undefined || newExcel[i][j] === null) {
+                    if (newExcel[i][j] === undefined || newExcel[i][j] === null || isNaN(newExcel[i][j])) {
                         text += '' + null + ','
                     } else if (typeof newExcel[i][j] === 'object') {
                         text += '\'' + newExcel[i][j].v + '\','
@@ -372,8 +389,6 @@ function buildXlsx(newExcel, resultName) {
                     }], {}, function (error, xlsBuffer) {
                         if (!error) {
                             fs.writeFileSync(fs.realpathSync('./ready') + '/' + resultName + '.xlsx', xlsBuffer);
-                            let ObjectXls = xlsxConverter.readFile(fs.realpathSync('./ready') + '/' + resultName + '.xlsx');
-                            xlsxConverter.writeFile(ObjectXls, fs.realpathSync('./ready') + '/' + resultName + '.xlsx', {compression: true})
                             console.log('Прайс ' + resultName + ' записан');
                             resolve()
                         } else {
@@ -390,9 +405,7 @@ function buildXlsx(newExcel, resultName) {
             }], {}, function (error, xlsBuffer) {
                 if (!error) {
                     fs.writeFileSync(fs.realpathSync('./ready') + '/' + resultName + '.xlsx', xlsBuffer);
-                    let ObjectXls = xlsxConverter.readFile(fs.realpathSync('./ready') + '/' + resultName + '.xlsx');
-                    xlsxConverter.writeFile(ObjectXls, fs.realpathSync('./ready') + '/' + resultName + '.xlsx', {compression: true})
-                    console.log('Прайс ' + resultName + ' записан');
+                   console.log('Прайс ' + resultName + ' записан');
                     resolve()
                 } else {
                     console.log('Ошибка записи ' + error);
@@ -411,7 +424,7 @@ async function convertFiles(path, template, tables, resultName) {
 
             let object = await convertTxtToArray(path);
             let ee = await modifyExcel(object, template);
-            await buildXlsx(ee, resultName);
+            await buildXlsx(ee, resultName, path);
             resolve();
 
 
@@ -423,7 +436,8 @@ async function convertFiles(path, template, tables, resultName) {
             let realPath = fs.realpathSync('./temp.xlsx');
             let object = await convertXlsxToArray(realPath);
 
-            if (object.length > 1 && resultName === 'УАЗ ЦС') {
+            if (object.length > 1 && path.includes('uaz-email')) {
+                object.splice(0, 1);
                 for (let i = 0; i < object.length; i++) {
 
                     let list = object[i];
@@ -435,15 +449,15 @@ async function convertFiles(path, template, tables, resultName) {
 
                         let elem = list.data[j];
                         if (i === 0) {
-                            elem.splice(4, 2);
-                            if (elem[4] === undefined || elem[1] === 'Каталожный номер') {
+                            elem.splice(3, 2);
+                            if (elem[3] === undefined || elem[0] === 'Каталожный номер') {
                                 list.data.splice(list.data.indexOf(elem), 1);
                                 j--
                             }
                         } else {
-                            elem.splice(4, 1);
+                            elem.splice(3, 1);
                             //red склеиваем листы
-                            if (elem[4] !== undefined && elem[1] !== 'Каталожный номер') {
+                            if (elem[3] !== undefined && elem[0] !== 'Каталожный номер') {
                                 object[0].data.push(elem)
                             }
                         }
@@ -459,7 +473,7 @@ async function convertFiles(path, template, tables, resultName) {
             await Promise.all(tables.map(async (table) => {
                 arrayOfTables.push(table.name)
             }));
-            await buildXlsx(await modifyExcel(object, template, arrayOfTables, resultName), resultName);
+            await buildXlsx(await modifyExcel(object, template, arrayOfTables, resultName), resultName, path);
             resolve();
         }
     })
@@ -620,7 +634,7 @@ async function modifyExcel(parsedObject, template, arrayOfTables, resultName) {
                         }
 
                         //тут мы преобразовываем формулу в js. самое сложное
-                        let formula = await formula_lib.makeFormula(('' + formule).substring(0, formule.length), oldElem);
+                        let formula = await formula_lib.makeFormula(('' + formule).substring(0, formule.length), oldElem, CBCurrencies);
                         let ff = formula;
                         try {
 

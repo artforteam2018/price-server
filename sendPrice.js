@@ -57,6 +57,7 @@ async function sendPrices() {
                             receive.frequency,
                             receive.title,
                             receive.region,
+                            receive.groups,
                             false,
                             receive.removed,
                             receive.id
@@ -150,6 +151,7 @@ function convertXlsxToArray(path) {
 
 async function createAndSendMail(receive, readyFolder, receiverList){
     return new Promise(async resolve => {
+        var templates = await clientPg.query(queries.getRulesQuery);
         let oldDate = new Date();
         await clientPg.query({
             text: queries.insertSendLog,
@@ -158,12 +160,42 @@ async function createAndSendMail(receive, readyFolder, receiverList){
 
         let attach = [];
         try {
-            await Promise.all(receive.templates.map(async (elem2) => {
-                attach.push({
-                    filename: elem2 + '.xlsx',
-                    content: fs.readFileSync(readyFolder + elem2 + '.xlsx')
+            if (receive.groups !== '') {
+                receive.groups.split(', ').map(async g => {
+                    let bigXlsx = [];
+                    let bigName = '';
+                    if (g.split(';').length > 1) {
+                        await Promise.all(g.split('; ').map(async gg => {
+                            return new Promise(async resolve1 => {
+                                let template = templates.rows.filter(f => f.id.toString() === gg)[0].name;
+                                let xlsx = await convertXlsxToArray(readyFolder + template + '.xlsx');
+                                bigXlsx = bigXlsx.concat(xlsx[0].data);
+                                bigName += template + ' + ';
+                                resolve1();
+                            })
+                        }));
+                        bigXlsx = await buildXlsx(bigXlsx);
+                        attach.push({
+                            filename: bigName.substring(0, bigName.length - 3) + '.xlsx',
+                            content: bigXlsx
+                        });
+
+                    } else {
+                        let template = templates.rows.filter(f => f.id.toString() === g.replace(' ', ''))[0].name;
+                        attach.push({
+                            filename: template + '.xlsx',
+                            content: fs.readFileSync(readyFolder + template + '.xlsx')
+                        });
+                    }
                 });
-            }));
+            } else {
+                await Promise.all(receive.templates.map(async (elem2) => {
+                    attach.push({
+                        filename: elem2 + '.xlsx',
+                        content: fs.readFileSync(readyFolder + elem2 + '.xlsx')
+                    });
+                }));
+            }
         } catch (e) {
             clientPg.query({
                 text: queries.insertSendLog,
