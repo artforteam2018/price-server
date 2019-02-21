@@ -125,7 +125,7 @@ async function main() {
     `;
 
     let template = await convertDBQueryToArray(query);
-    //await mailListen(template);
+    await mailListen(template);
     await gmMakeRequest(template);
 
     template = await convertDBQueryToArray(query);
