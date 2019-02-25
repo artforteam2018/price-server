@@ -39,7 +39,7 @@ clientPg.query({
             port: result.rows.filter(row => row.name === 'Порт')[0].param,
             tls: true,
             tlsOptions: {rejectUnauthorized: false},
-            search: [['SINCE', new Date(Date.now() - 1000*60*60*24*5)]],
+            search: [['SINCE', new Date(Date.now() - 1000 * 60 * 60 * 24 * 5)]],
             debug: (e) => {
                 if (e.includes('[connection] Error')) {
                     console.log("Ошибка.");
@@ -105,7 +105,7 @@ async function main() {
 
     let query = `SELECT convert_rules.id,
                         sender,
-                        t.pseudoname AS outer_name,
+                        t.pseudoname  AS outer_name,
                         filter,
                         t.filters     AS filters,
                         t.formulas    AS formulas,
@@ -119,12 +119,14 @@ async function main() {
                         LEFT JOIN templates t on convert_rules.template = t.id
                         LEFT JOIN headers h on convert_rules.headers = h.id
                  WHERE convert_rules.removed = false
-                 GROUP BY convert_rules.id, title_filter, pseudoname, filter, sender, template, source, t.filters, h.columns,
-                   t.formulas, t.unions
+                 GROUP BY convert_rules.id, title_filter, pseudoname, filter, sender, template, source, t.filters,
+                          h.columns,
+                          t.formulas, t.unions
                  ORDER BY convert_rules.id
     `;
 
     let template = await convertDBQueryToArray(query);
+
     await mailListen(template);
     await gmMakeRequest(template);
 
@@ -251,7 +253,7 @@ async function mailListen(template) {
                                             }));
                                             resolve1();
 
-                                        }).catch ((e) => {
+                                        }).catch((e) => {
                                             resolve1();
                                         });
                                     }
@@ -376,13 +378,13 @@ function buildXlsx(newExcel, resultName, path) {
                         text += '' + newExcel[i][j] + ','
                     }
                 }
-                text = text.substring(0, text.length-1) + '),';
+                text = text.substring(0, text.length - 1) + '),';
             }
-            text = text.substring(0, text.length-1) + ';';
+            text = text.substring(0, text.length - 1) + ';';
             console.log(text)
 
             clientPg.query(text)
-                .then(()=> {
+                .then(() => {
                     xlsx.buildAsync([{
                         name: "price",
                         data: newExcel
@@ -405,7 +407,7 @@ function buildXlsx(newExcel, resultName, path) {
             }], {}, function (error, xlsBuffer) {
                 if (!error) {
                     fs.writeFileSync(fs.realpathSync('./ready') + '/' + resultName + '.xlsx', xlsBuffer);
-                   console.log('Прайс ' + resultName + ' записан');
+                    console.log('Прайс ' + resultName + ' записан');
                     resolve()
                 } else {
                     console.log('Ошибка записи ' + error);
@@ -612,6 +614,7 @@ async function modifyExcel(parsedObject, template, arrayOfTables, resultName) {
             }
 
             let newExcel = [];
+            newExcel.unshift(template.columns);
             //parsing and use formulas
 
             await Promise.all(parsedObject[0].data.map(async (oldElem) => {
@@ -623,7 +626,7 @@ async function modifyExcel(parsedObject, template, arrayOfTables, resultName) {
                     for (let i = 0; i < template.columns.length; i++) {
                         /** @namespace template.formulas */
                         let formule = template.formulas[i];
-                        if (formule === undefined){
+                        if (formule === undefined) {
                             continue;
                         }
                         let format = '';
@@ -642,7 +645,7 @@ async function modifyExcel(parsedObject, template, arrayOfTables, resultName) {
                         } catch (e) {
                             console.log(ff);
                         }
-                        if (formula === 2/0){
+                        if (formula === 2 / 0) {
                             console.log(ff)
                         }
 
@@ -672,67 +675,75 @@ async function modifyExcel(parsedObject, template, arrayOfTables, resultName) {
 }
 
 function gmMakeRequest(template) {
-    return new Promise((resolve, reject) => {
-        console.log("Скачивание прайса gm...");
-        let cookiejar = req.jar();
-        let chunks = [];
+    return new Promise(async (resolve, reject) => {
+        if ((await (clientPg.query({
+            text: 'SELECT param FROM settings WHERE settings.name = $1',
+            values: ['Блокировка портала']
+        }))).rows[0].param !== 'Да') {
+            console.log("Скачивание прайса gm...");
+            let cookiejar = req.jar();
+            let chunks = [];
 
-        clientPg.query({
-            text: 'SELECT * FROM SETTINGS WHERE folder = $1',
-            values: ['Портал']
-        })
-            .then(result => {
-
-                req.post('https://gm-system.ru/logon.aspx?ReturnUrl=%2finv310t.aspx', {
-                    form: {
-                        __VIEWSTATE: '/wEPDwUKMTQ4NDQ4Mzg5OA9kFgICAQ9kFgICBQ8WBB4IZGlzYWJsZWRkHgdWaXNpYmxlZ2RkJYnr25q2Le7GCkMzeAxPtQ==',
-                        __EVENTVALIDATION: '/wEdAATPNFOBfaFoumntiQHVWjTWY3plgk0YBAefRz3MyBlTcHY2+Mc6SrnAqio3oCKbxYa/Ddi58i/dsQ6aLnYJIUBmP9QJB9H8R/JbGT6I/xJqEQ==',
-                        txtUserName: result.rows.filter(row => row.name === 'Логин на портал')[0].param,
-                        txtPassword: result.rows.filter(row => row.name === 'Пароль на портал')[0].param
-                    }
-                }).on('error', (err) => {
-                    resolve();
-                    console.log("Ошибка подключения к порталу GM: " + err)
-                }).on('response', (response) => {
-                    if (response.headers["set-cookie"] && response.headers["set-cookie"].length > 1) {
-                        cookiejar.setCookie(response.headers["set-cookie"][0], 'https://gm-system.ru/inv310t.aspx');
-                        cookiejar.setCookie(response.headers["set-cookie"][1], 'https://gm-system.ru/inv310t.aspx');
-                        req.post('https://gm-system.ru/inv310t.aspx', {
-                            form: {
-                                __EVENTTARGET: 'ctl01',
-                                __EVENTARGUMENT: '',
-                                __VIEWSTATE: '/wEPDwULLTEzNjQ2MDIxNTAPZBYEZg9kFggCAQ8WAh4JaW5uZXJodG1sBT5HTSBTeXN0ZW0gLSDQodC+0YHRgtC+0Y/QvdC40LUg0YHQutC70LDQtNCwINC30LDQv9GH0LDRgdGC0LXQuWQCAw88KwAFAQMUKwACEBYEHgZJdGVtSUQFFlRvcDFfTWVudTEtbWVudUl0ZW0wMDAeCEl0ZW1UZXh0BQ7QodC40YHRgtC10LzQsBQrAAIQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMC1zdWJNZW51LW1lbnVJdGVtMDAxHwIFF9Ch0LzQtdC90LAg0L/QsNGA0L7Qu9GPHgdJdGVtVVJMBQ9jaGFuZ2VwYXNzLmFzcHhkZBAWBh8BBSpUb3AxX01lbnUxLW1lbnVJdGVtMDAwLXN1Yk1lbnUtbWVudUl0ZW0wMDIfAgUK0JLRi9GF0L7QtB8DBQlleGl0LmFzcHhkZGQQFgQfAQUWVG9wMV9NZW51MS1tZW51SXRlbTAwMR8CBR3QodC60LvQsNC0INC30LDQv9GH0LDRgdGC0LXQuRQrAAQQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMS1zdWJNZW51LW1lbnVJdGVtMDAwHwIFMtCh0L7RgdGC0L7Rj9C90LjQtSDRgdC60LvQsNC00LAg0LfQsNC/0YfQsNGB0YLQtdC5HwMFDGludjMxMHQuYXNweGRkEBYGHwEFKlRvcDFfTWVudTEtbWVudUl0ZW0wMDEtc3ViTWVudS1tZW51SXRlbTAwMR8CBSHQntGC0LvQvtC20LXQvdC90YvQtSDQt9Cw0LrQsNC30YsfAwUMb3JwMTQwdC5hc3B4ZGQQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMS1zdWJNZW51LW1lbnVJdGVtMDAyHwIFG9Ch0YLQsNGC0YPRgSDQt9Cw0LrQsNC30L7Qsh8DBQxzdG0xMTB0LmFzcHhkZBAWBh8BBSpUb3AxX01lbnUxLW1lbnVJdGVtMDAxLXN1Yk1lbnUtbWVudUl0ZW0wMDMfAgUd0JfQsNC60LDQtyDQt9Cw0L/Rh9Cw0YHRgtC10LkfAwULb3JwMTEwLmFzcHhkZGRkAgUPFgIfAAUq0JfQtNGA0LDQstGB0YLQstGD0LnRgtC1IFN2ZXRsYW5hIEtvc2htYXIhZAIHDxYCHgdWaXNpYmxlaGQCAg9kFgJmD2QWAgIHD2QWAmYPFgIfAAVi0J7QsdC90L7QstC70LXQvdC40LUgREFUOiAxOC4xMi4yMDE1IDA0OjIwOjQzPGJyPtCe0LHQvdC+0LLQu9C10L3QuNC1IFNORzogMjMuMDEuMjAxOSAxMzoyODo1OTxicj5kZDeZ0nCJ7JYHC1BgaScT0+E=',
-                                __VIEWSTATEGENERATOR: 'ACCA6985',
-                                __EVENTVALIDATION: '/wEdAAWkZZu4SpMvIFRnXbSzYtL1nS6zCR2bqUXJuevSr6A3NiXIFWL+wv45SHU62q4rLobxTrg7s/eG70UIAOod3OxqcWtaTiCzWpv2jfgTJfZJLmn4OSO2uJ+O7zNnpLgP+WU=',
-                                tMask: '',
-                                hdnMask: ''
-                            },
-                            jar: cookiejar
-                        }).on('error', (err) => {
-                            resolve();
-                            console.log("Ошибка подключения к порталу GM: " + err)
-                        }).on('data', (data) => {
-                            chunks.push(data)
-                        }).once('end', async () => {
-                            let buffer = Buffer.concat(chunks);
-
-                            let file = iconv.decode(buffer, 'cp-1251');
-                            fs.writeFileSync('./attachments/gm-stock.txt', file);
-                            await Promise.all(template.map(async (elem) => {
-                                /** @namespace elem.outer_name */
-                                if (elem.outer_name === 'GM') {
-                                    writeMail('./attachments/gm-stock.txt', undefined, new Date(), template, elem.id);
-                                    resolve();
-                                }
-                            }));
-                            resolve();
-                        })
-                    } else {
-                        console.log('Необходимо обновить пароль к порталу GM!');
-                        resolve();
-                    }
-                })
+            clientPg.query({
+                text: 'SELECT * FROM SETTINGS WHERE folder = $1',
+                values: ['Портал']
             })
+                .then(result => {
+
+                    req.post('https://gm-system.ru/logon.aspx?ReturnUrl=%2finv310t.aspx', {
+                        form: {
+                            __VIEWSTATE: '/wEPDwUKMTQ4NDQ4Mzg5OA9kFgICAQ9kFgICBQ8WBB4IZGlzYWJsZWRkHgdWaXNpYmxlZ2RkJYnr25q2Le7GCkMzeAxPtQ==',
+                            __EVENTVALIDATION: '/wEdAATPNFOBfaFoumntiQHVWjTWY3plgk0YBAefRz3MyBlTcHY2+Mc6SrnAqio3oCKbxYa/Ddi58i/dsQ6aLnYJIUBmP9QJB9H8R/JbGT6I/xJqEQ==',
+                            txtUserName: result.rows.filter(row => row.name === 'Логин на портал')[0].param,
+                            txtPassword: result.rows.filter(row => row.name === 'Пароль на портал')[0].param
+                        }
+                    }).on('error', (err) => {
+                        resolve();
+                        console.log("Ошибка подключения к порталу GM: " + err)
+                    }).on('response', (response) => {
+                        if (response.headers["set-cookie"] && response.headers["set-cookie"].length > 1) {
+                            cookiejar.setCookie(response.headers["set-cookie"][0], 'https://gm-system.ru/inv310t.aspx');
+                            cookiejar.setCookie(response.headers["set-cookie"][1], 'https://gm-system.ru/inv310t.aspx');
+                            req.post('https://gm-system.ru/inv310t.aspx', {
+                                form: {
+                                    __EVENTTARGET: 'ctl01',
+                                    __EVENTARGUMENT: '',
+                                    __VIEWSTATE: '/wEPDwULLTEzNjQ2MDIxNTAPZBYEZg9kFggCAQ8WAh4JaW5uZXJodG1sBT5HTSBTeXN0ZW0gLSDQodC+0YHRgtC+0Y/QvdC40LUg0YHQutC70LDQtNCwINC30LDQv9GH0LDRgdGC0LXQuWQCAw88KwAFAQMUKwACEBYEHgZJdGVtSUQFFlRvcDFfTWVudTEtbWVudUl0ZW0wMDAeCEl0ZW1UZXh0BQ7QodC40YHRgtC10LzQsBQrAAIQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMC1zdWJNZW51LW1lbnVJdGVtMDAxHwIFF9Ch0LzQtdC90LAg0L/QsNGA0L7Qu9GPHgdJdGVtVVJMBQ9jaGFuZ2VwYXNzLmFzcHhkZBAWBh8BBSpUb3AxX01lbnUxLW1lbnVJdGVtMDAwLXN1Yk1lbnUtbWVudUl0ZW0wMDIfAgUK0JLRi9GF0L7QtB8DBQlleGl0LmFzcHhkZGQQFgQfAQUWVG9wMV9NZW51MS1tZW51SXRlbTAwMR8CBR3QodC60LvQsNC0INC30LDQv9GH0LDRgdGC0LXQuRQrAAQQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMS1zdWJNZW51LW1lbnVJdGVtMDAwHwIFMtCh0L7RgdGC0L7Rj9C90LjQtSDRgdC60LvQsNC00LAg0LfQsNC/0YfQsNGB0YLQtdC5HwMFDGludjMxMHQuYXNweGRkEBYGHwEFKlRvcDFfTWVudTEtbWVudUl0ZW0wMDEtc3ViTWVudS1tZW51SXRlbTAwMR8CBSHQntGC0LvQvtC20LXQvdC90YvQtSDQt9Cw0LrQsNC30YsfAwUMb3JwMTQwdC5hc3B4ZGQQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMS1zdWJNZW51LW1lbnVJdGVtMDAyHwIFG9Ch0YLQsNGC0YPRgSDQt9Cw0LrQsNC30L7Qsh8DBQxzdG0xMTB0LmFzcHhkZBAWBh8BBSpUb3AxX01lbnUxLW1lbnVJdGVtMDAxLXN1Yk1lbnUtbWVudUl0ZW0wMDMfAgUd0JfQsNC60LDQtyDQt9Cw0L/Rh9Cw0YHRgtC10LkfAwULb3JwMTEwLmFzcHhkZGRkAgUPFgIfAAUq0JfQtNGA0LDQstGB0YLQstGD0LnRgtC1IFN2ZXRsYW5hIEtvc2htYXIhZAIHDxYCHgdWaXNpYmxlaGQCAg9kFgJmD2QWAgIHD2QWAmYPFgIfAAVi0J7QsdC90L7QstC70LXQvdC40LUgREFUOiAxOC4xMi4yMDE1IDA0OjIwOjQzPGJyPtCe0LHQvdC+0LLQu9C10L3QuNC1IFNORzogMjMuMDEuMjAxOSAxMzoyODo1OTxicj5kZDeZ0nCJ7JYHC1BgaScT0+E=',
+                                    __VIEWSTATEGENERATOR: 'ACCA6985',
+                                    __EVENTVALIDATION: '/wEdAAWkZZu4SpMvIFRnXbSzYtL1nS6zCR2bqUXJuevSr6A3NiXIFWL+wv45SHU62q4rLobxTrg7s/eG70UIAOod3OxqcWtaTiCzWpv2jfgTJfZJLmn4OSO2uJ+O7zNnpLgP+WU=',
+                                    tMask: '',
+                                    hdnMask: ''
+                                },
+                                jar: cookiejar
+                            }).on('error', (err) => {
+                                resolve();
+                                console.log("Ошибка подключения к порталу GM: " + err)
+                            }).on('data', (data) => {
+                                chunks.push(data)
+                            }).once('end', async () => {
+                                let buffer = Buffer.concat(chunks);
+
+                                let file = iconv.decode(buffer, 'cp-1251');
+                                fs.writeFileSync('./attachments/gm-stock.txt', file);
+                                await Promise.all(template.map(async (elem) => {
+                                    /** @namespace elem.outer_name */
+                                    if (elem.outer_name === 'GM') {
+                                        writeMail('./attachments/gm-stock.txt', undefined, new Date(), template, elem.id);
+                                        resolve();
+                                    }
+                                }));
+                                resolve();
+                            })
+                        } else {
+                            console.log('Необходимо обновить пароль к порталу GM!');
+                            clientPg.query({text: 'UPDATE settings SET param = $2 WHERE name = $1', values: ["Блокировка портала", "Да"]}).then(result => {
+                                resolve();
+                            });
+
+                        }
+                    })
+                })
+        }
     })
 
 }

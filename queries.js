@@ -83,6 +83,10 @@ let getTableQuery3 = `SELECT rule_name,
                              groups,
                              date,
                              send_now,
+                             array(SELECT columns FROM headers RIGHT JOIN (select t.headers AS header_id
+                                   from send_rules_templates
+                                          LEFT JOIN convert_rules t ON send_rules_templates.convert_rule = t.id
+                                   WHERE send_rules_templates.send_rule = send_rules.id ORDER BY id LIMIT 1) ss ON headers.id = ss.header_id) AS header,
                              array(select t.name AS template
                                    from send_rules_templates
                                           LEFT JOIN convert_rules t ON send_rules_templates.convert_rule = t.id

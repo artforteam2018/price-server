@@ -98,6 +98,19 @@ app.get('/getConvertRulesComp', (req, res) => {
         })
 });
 
+app.get('/getGmPwd', (req, res) => {
+    checkToken(req)
+        .then(() => {
+            clientPg.query({
+                text: 'SELECT param FROM settings WHERE settings.name = $1',
+                values: ['Блокировка портала']
+            }).then((result) => {
+                res.send(result.rows[0].param === 'Да')
+            });
+        })
+});
+
+
 app.get('/getTemplatesComp', (req, res) => {
     checkToken(req)
         .then(() => {
@@ -248,8 +261,21 @@ app.post('/getOneRow', (req, res) => {
 
                     let ObjectXls = xlsxConverter.readFile(result.rows[0].source);
                     let oneRowKeys = Object.keys(ObjectXls.Sheets[ObjectXls.SheetNames[0]]).filter(key => key.match(/[A-Z]10$/g) !== null);
+                    let threeRows = Object.keys(ObjectXls.Sheets[ObjectXls.SheetNames[0]]).filter(key => key.match(/[A-Z](10|11|12)$/g) !== null);
 
                     let elem = oneRowKeys.map(key => ObjectXls.Sheets[ObjectXls.SheetNames[0]][key].v);
+                    let threeRowsMap = threeRows.map(key => ObjectXls.Sheets[ObjectXls.SheetNames[0]][key].v);
+
+                    let splitter = threeRows.length / 3;
+                    let threeRowsAnswer = [];
+                    let newRow = [];
+                    for (let i = 0; i < threeRowsMap.length; i++) {
+                        newRow.push(threeRowsMap[i]);
+                        if ((i+1)%splitter === 0) {
+                            threeRowsAnswer.push(newRow);
+                            newRow = [];
+                        }
+                    }
 
                     let oneRowAnswer = await Promise.all(req.body.data.item.map(async item => {
                         try {
@@ -271,7 +297,7 @@ app.post('/getOneRow', (req, res) => {
                             return 'ошибка'
                         }
                     }));
-                    res.send({data: oneRowAnswer});
+                    res.send({data: oneRowAnswer, threeRows: threeRowsAnswer});
                 })
         })
 });
