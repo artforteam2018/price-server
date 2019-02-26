@@ -159,6 +159,18 @@ app.get('/getHeadersComp', (req, res) => {
         })
 });
 
+app.get('/getAddComp', (req, res) => {
+    checkToken(req)
+        .then(() => {
+
+            clientPg.query(queries.add_comp)
+                .then(result => {
+                    res.send(result.rows)
+                })
+                .catch(reason => console.log(reason))
+        })
+});
+
 app.get('/getReceivers', (req, res) => {
     checkToken(req)
         .then(() => {
@@ -312,10 +324,11 @@ app.post('/changeTemplates', (req, res) => {
                     req.body.data = req.body.data.map(template => {
                         delete template.template_name;
                         delete template.headers_name;
+                        delete template.add_tables_id_name;
                         return template;
                     });
                     await Promise.all(req.body.data.map(rule => {
-                        return new Promise(resolve => {
+                        return new Promise(async resolve => {
                             let oldRule = result.rows.filter(row => row.id === rule.id);
                             if (oldRule.length > 0) {
                                 if (JSON.stringify(oldRule[0]) !== JSON.stringify(rule)) {
@@ -323,6 +336,10 @@ app.post('/changeTemplates', (req, res) => {
                                         text: queries.changeRulesQuery,
                                         values: [rule.name, rule.template, rule.sender, rule.filter, rule['title_filter'], rule.headers, rule.removed, rule.id]
                                     };
+                                    await clientPg.query({text: 'delete from rules_tables where convert_rule = $1', values:[rule.id]});
+                                    rule.add_tables_id.forEach(async add => {
+                                        await clientPg.query({text: 'insert into rules_tables values ($1, $2)', values:[rule.id, add]});
+                                    });
                                     clientPg.query(query)
                                         .then(() => {
                                             countGood++;
@@ -622,6 +639,17 @@ app.get('/getHeaders', (req, res) => {
     checkToken(req)
         .then(() => {
             clientPg.query(queries.getHeadersQuery)
+                .then(result => {
+                    res.send(result.rows)
+                })
+                .catch(reason => console.log(reason))
+        })
+});
+
+app.get('/getAdd', (req, res) => {
+    checkToken(req)
+        .then(() => {
+            clientPg.query(queries.getAddQuery)
                 .then(result => {
                     res.send(result.rows)
                 })

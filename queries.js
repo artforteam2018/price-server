@@ -19,6 +19,10 @@ let getTableQuery = `SELECT rule_name,
                                   from send_receivers
                                          LEFT JOIN receivers r on send_receivers.receiver = r.id
                                   WHERE send_receivers.send_table = send_rules.id) AS receivers,
+                            array(SELECT additional_tables.id
+                            FROM rules_tables
+                                   LEFT JOIN additional_tables ON rules_tables.add_table = additional_tables.id
+                            WHERE convert_rule = id) AS add_tables,
                             removed
                      FROM send_rules
                             LEFT JOIN (Select send_price_log.date,
@@ -121,7 +125,10 @@ let getRulesQuery = `SELECT convert_rules.name AS name,
                             t.id AS template,
                             h.id AS headers,
                             convert_rules.removed,
-                            convert_rules.name
+                            convert_rules.name,
+                            array(SELECT add_table
+                                  FROM rules_tables
+                                  WHERE rules_tables.convert_rule = convert_rules.id) AS add_tables_id
                      FROM convert_rules 
                        LEFT JOIN templates t on convert_rules.template = t.id 
                        LEFT JOIN headers h on convert_rules.headers = h.id
@@ -144,6 +151,8 @@ let changeTemplateQuery = 'UPDATE public.templates SET filters =$1, formulas =$2
 let insertTemplateQuery = 'INSERT INTO public.templates(filters, formulas, unions, pseudoname, removed) VALUES($1, $2, $3, $4, $5)';
 
 let getHeadersQuery = 'SELECT * FROM headers WHERE removed = false';
+
+let getAddQuery = 'SELECT * FROM additional_tables';
 
 let changeHeadersQuery = 'UPDATE public.headers SET name = $1, columns =$2, removed =$3 WHERE id = $4';
 
@@ -185,7 +194,7 @@ let templates_comp = 'Select pseudoname, id FROM templates';
 let receivers_comp = 'Select name, id FROM receivers';
 let sender_comp = 'Select name, id FROM senders';
 let headers_comp = 'Select name, id FROM headers';
-
+let add_comp = 'Select name, id FROM additional_tables';
 let getSendLog = 'SELECT * FROM send_price_log WHERE send_rule =$1 ORDER BY date desc LIMIT $2';
 
 let getLastUpdate = `SELECT update_price_log.date, update_price_log.convert_rule, send
@@ -262,6 +271,7 @@ module.exports.changeTemplateQuery = changeTemplateQuery;
 module.exports.insertTemplateQuery = insertTemplateQuery;
 
 module.exports.getHeadersQuery = getHeadersQuery;
+module.exports.getAddQuery = getAddQuery;
 module.exports.changeHeadersQuery = changeHeadersQuery;
 module.exports.insertHeadersQuery = insertHeadersQuery;
 
@@ -282,6 +292,7 @@ module.exports.templates_comp = templates_comp;
 module.exports.receivers_comp = receivers_comp;
 module.exports.sender_comp = sender_comp;
 module.exports.headers_comp = headers_comp;
+module.exports.add_comp = add_comp;
 
 module.exports.getSendLog = getSendLog;
 module.exports.insertSendLog = insertSendLog;

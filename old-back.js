@@ -743,6 +743,8 @@ function gmMakeRequest(template) {
                         }
                     })
                 })
+        } else {
+            resolve();
         }
     })
 
