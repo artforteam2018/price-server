@@ -504,6 +504,7 @@ app.post('/changeTable', (req, res) => {
                                             rule.title,
                                             rule.region,
                                             rule.groups,
+                                            rule.xls,
                                             rule.send_now,
                                             rule.removed,
                                             rule.id
@@ -579,6 +580,8 @@ app.post('/changeTable', (req, res) => {
                                         rule.frequency,
                                         rule.title,
                                         rule.send_now,
+                                        rule.groups,
+                                        rule.xls,
                                         false
                                     ]
                                 };

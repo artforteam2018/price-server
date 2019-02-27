@@ -58,6 +58,7 @@ async function sendPrices() {
                             receive.title,
                             receive.region,
                             receive.groups,
+                            receive.xls,
                             false,
                             receive.removed,
                             receive.id
@@ -161,14 +162,17 @@ async function createAndSendMail(receive, readyFolder, receiverList){
         let attach = [];
         try {
             if (receive.groups !== '') {
+                let names = receive.result_name.split('; ');
+                let counter = 0;
                 receive.groups.split(', ').map(async g => {
                     let bigXlsx = [];
                     let bigName = '';
                     if (g.split(';').length > 1) {
+
                         await Promise.all(g.split('; ').map(async gg => {
                             return new Promise(async resolve1 => {
                                 let template = templates.rows.filter(f => f.id.toString() === gg)[0].name;
-                                let xlsx = await convertXlsxToArray('./' + readyFolder + template + '.xlsx');
+                                let xlsx = await convertXlsxToArray('./' + readyFolder + template +  receive.xls ? '.xls' : '.xlsx');
                                 bigXlsx = bigXlsx.concat(xlsx[0].data);
                                 bigName += template + ' + ';
                                 resolve1();
@@ -178,27 +182,28 @@ async function createAndSendMail(receive, readyFolder, receiverList){
                         bigXlsx.unshift(receive.header[0]);
                         bigXlsx = await buildXlsx(bigXlsx);
                         attach.push({
-                            filename: bigName.substring(0, bigName.length - 3) + '.xlsx',
+                            filename:receive.result_name +  (receive.xls ? '.xls' : '.xlsx'),
                             content: bigXlsx
                         });
-                        fs.writeFileSync(readyFolder2 + bigName.substring(0, bigName.length - 3) + '.xlsx', bigXlsx)
+                        fs.writeFileSync(readyFolder2 + bigName.substring(0, bigName.length - 3) +  receive.xls ? '.xls' : '.xlsx', bigXlsx)
 
                     } else {
                         let template = templates.rows.filter(f => f.id.toString() === g.replace(' ', ''))[0].name;
                         attach.push({
-                            filename: template + '.xlsx',
-                            content: fs.readFileSync(readyFolder + template + '.xlsx')
+                            filename: names[counter] +  (receive.xls ? '.xls' : '.xlsx'),
+                            content: fs.readFileSync(readyFolder + template +  '.xlsx')
                         });
-                        fs.writeFileSync(readyFolder2 + template + '.xlsx', fs.readFileSync(readyFolder + template + '.xlsx'))
+                        fs.writeFileSync(readyFolder2 + template +  receive.xls ? '.xls' : '.xlsx', fs.readFileSync(readyFolder + template +  '.xlsx'))
                     }
+                    counter++;
                 });
             } else {
                 await Promise.all(receive.templates.map(async (elem2) => {
                     attach.push({
-                        filename: elem2 + '.xlsx',
-                        content: fs.readFileSync(readyFolder + elem2 + '.xlsx')
+                        filename: receive.result_name + (receive.xls ? '.xls' : '.xlsx'),
+                        content: fs.readFileSync(readyFolder + elem2 +  '.xlsx')
                     });
-                    fs.writeFileSync(readyFolder2 + elem2 + '.xlsx', fs.readFileSync(readyFolder + elem2 + '.xlsx'))
+                    fs.writeFileSync(readyFolder2 + elem2 +  receive.xls ? '.xls' : '.xlsx', fs.readFileSync(readyFolder + elem2 + '.xlsx'))
                 }));
             }
         } catch (e) {
@@ -215,14 +220,6 @@ async function createAndSendMail(receive, readyFolder, receiverList){
             values: [receive.sender]
         });
 
-        let mailOptions = {
-            from: result.rows[0].email, // sender address
-            to: receiversList.map(r => r.email), // list of receivers
-            subject: receive.title, // Subject line
-            text: '', // plain text body
-            attachments: attach
-        };
-
         const mailTransport = require('nodemailer').createTransport({
             host: result.rows[0].host,
             port: result.rows[0].port,
@@ -232,35 +229,44 @@ async function createAndSendMail(receive, readyFolder, receiverList){
                 pass: result.rows[0].password
             }
         });
+        receiversList.map(r => {
 
+            let mailOptions = {
+                from: result.rows[0].email, // sender address
+                to: r.email, // list of receivers
+                subject: receive.title, // Subject line
+                text: '', // plain text body
+                attachments: attach
+            };
+            mailTransport.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    clientPg.query({
+                        text: queries.changeSendLog,
+                        values: [receive.id, new Date(), 'error', error, oldDate]
+                    })
+                        .then(() => {
+                            resolve();
+                        })
+                        .catch(reason => {
+                            console.log(reason);
+                            resolve();
+                        });
+                } else {
+                    clientPg.query({
+                        text: queries.changeSendLog,
+                        values: [receive.id, new Date(), 'success', info, oldDate]
+                    })
+                        .then(() => {
+                            console.log("прайс сформирован и отослан на " + receive.receivers);
+                            resolve();
+                        })
+                        .catch(reason => {
+                            console.log(reason);
+                            resolve();
+                        });
+                }
+            });
 
-        mailTransport.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                clientPg.query({
-                    text: queries.changeSendLog,
-                    values: [receive.id, new Date(), 'error', error, oldDate]
-                })
-                    .then(()=>{
-                        resolve();
-                    })
-                    .catch(reason => {
-                        console.log(reason);
-                        resolve();
-                    });
-            } else {
-                clientPg.query({
-                    text: queries.changeSendLog,
-                    values: [receive.id, new Date(), 'success', info, oldDate]
-                })
-                    .then(() => {
-                        console.log("прайс сформирован и отослан на " + receive.receivers);
-                        resolve();
-                    })
-                    .catch(reason => {
-                        console.log(reason);
-                        resolve();
-                    });
-            }
         });
     });
 }
