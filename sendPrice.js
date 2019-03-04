@@ -172,7 +172,7 @@ async function createAndSendMail(receive, readyFolder, receiverList){
                         await Promise.all(g.split('; ').map(async gg => {
                             return new Promise(async resolve1 => {
                                 let template = templates.rows.filter(f => f.id.toString() === gg)[0].name;
-                                let xlsx = await convertXlsxToArray('./' + readyFolder + template +  receive.xls ? '.xls' : '.xlsx');
+                                let xlsx = await convertXlsxToArray(readyFolder + template + '.xlsx');
                                 bigXlsx = bigXlsx.concat(xlsx[0].data);
                                 bigName += template + ' + ';
                                 resolve1();
@@ -185,7 +185,7 @@ async function createAndSendMail(receive, readyFolder, receiverList){
                             filename:receive.result_name +  (receive.xls ? '.xls' : '.xlsx'),
                             content: bigXlsx
                         });
-                        fs.writeFileSync(readyFolder2 + bigName.substring(0, bigName.length - 3) +  receive.xls ? '.xls' : '.xlsx', bigXlsx)
+                        fs.writeFileSync(readyFolder2 + bigName.substring(0, bigName.length - 3) +  (receive.xls ? '.xls' : '.xlsx'), bigXlsx)
 
                     } else {
                         let template = templates.rows.filter(f => f.id.toString() === g.replace(' ', ''))[0].name;
@@ -193,7 +193,7 @@ async function createAndSendMail(receive, readyFolder, receiverList){
                             filename: names[counter] +  (receive.xls ? '.xls' : '.xlsx'),
                             content: fs.readFileSync(readyFolder + template +  '.xlsx')
                         });
-                        fs.writeFileSync(readyFolder2 + template +  receive.xls ? '.xls' : '.xlsx', fs.readFileSync(readyFolder + template +  '.xlsx'))
+                        fs.writeFileSync(readyFolder2 + template +  (receive.xls ? '.xls' : '.xlsx'), fs.readFileSync(readyFolder + template +  '.xlsx'))
                     }
                     counter++;
                 });
@@ -203,7 +203,7 @@ async function createAndSendMail(receive, readyFolder, receiverList){
                         filename: receive.result_name + (receive.xls ? '.xls' : '.xlsx'),
                         content: fs.readFileSync(readyFolder + elem2 +  '.xlsx')
                     });
-                    fs.writeFileSync(readyFolder2 + elem2 +  receive.xls ? '.xls' : '.xlsx', fs.readFileSync(readyFolder + elem2 + '.xlsx'))
+                    fs.writeFileSync(readyFolder2 + elem2 +  (receive.xls ? '.xls' : '.xlsx'), fs.readFileSync(readyFolder + elem2 + '.xlsx'))
                 }));
             }
         } catch (e) {

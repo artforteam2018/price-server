@@ -283,7 +283,7 @@ app.post('/getOneRow', (req, res) => {
                     let newRow = [];
                     for (let i = 0; i < threeRowsMap.length; i++) {
                         newRow.push(threeRowsMap[i]);
-                        if ((i+1)%splitter === 0) {
+                        if ((i + 1) % splitter === 0) {
                             threeRowsAnswer.push(newRow);
                             newRow = [];
                         }
@@ -336,9 +336,9 @@ app.post('/changeTemplates', (req, res) => {
                                         text: queries.changeRulesQuery,
                                         values: [rule.name, rule.template, rule.sender, rule.filter, rule['title_filter'], rule.headers, rule.removed, rule.id]
                                     };
-                                    await clientPg.query({text: 'delete from rules_tables where convert_rule = $1', values:[rule.id]});
+                                    await clientPg.query({text: 'delete from rules_tables where convert_rule = $1', values: [rule.id]});
                                     rule.add_tables_id.forEach(async add => {
-                                        await clientPg.query({text: 'insert into rules_tables values ($1, $2)', values:[rule.id, add]});
+                                        await clientPg.query({text: 'insert into rules_tables values ($1, $2)', values: [rule.id, add]});
                                     });
                                     clientPg.query(query)
                                         .then(() => {
@@ -1047,45 +1047,55 @@ io.on('connection', client => {
                         values: [data.region.split(',')]
                     };
                     clientPg.query(queryRules).then(result => {
-                        setTimeout(() => {
-                            result.rows.forEach(row => {
-                                clientPg.query({
-                                    text: queries.getSendLog,
-                                    values: [row.id, 4]
-                                })
-                                    .then(result => {
-                                        io.to(data.token).emit('updateSendLog', {
-                                            log: result.rows.map(row => ({
-                                                date: row.date.getTime(),
-                                                info: row.info,
-                                                send_rule: row.send_rule,
-                                                success: row.success
-                                            }))
-                                        });
-                                    });
-                            });
-                        }, 200);
-
-
-                        intervals.push({
-                            name: data.token, interval: setInterval(() => {
-                                result.rows.forEach(row => {
+                        setTimeout(async () => {
+                            let logg = [];
+                            await Promise.all(result.rows.map(row => {
+                                return new Promise(resolve => {
                                     clientPg.query({
                                         text: queries.getSendLog,
                                         values: [row.id, 4]
                                     })
                                         .then(result => {
-                                            io.to(data.token).emit('updateSendLog', {
-                                                log: result.rows.map(row => ({
+                                            logg.push(result.rows.map(row => ({
+                                                date: row.date.getTime(),
+                                                info: row.info,
+                                                send_rule: row.send_rule,
+                                                success: row.success
+                                            })));
+                                            resolve();
+                                        });
+                                })
+                            }))
+                            io.to(data.token).emit('updateSendLog', {
+                                log: logg
+                            });
+                        }, 200);
+
+
+                        intervals.push({
+                            name: data.token, interval: setInterval(async () => {
+                                let logg = [];
+                                await Promise.all(result.rows.map(row => {
+                                    return new Promise(resolve => {
+                                        clientPg.query({
+                                            text: queries.getSendLog,
+                                            values: [row.id, 4]
+                                        })
+                                            .then(result => {
+                                                logg.push(result.rows.map(row => ({
                                                     date: row.date.getTime(),
                                                     info: row.info,
                                                     send_rule: row.send_rule,
                                                     success: row.success
-                                                }))
+                                                })));
+                                                resolve();
                                             });
-                                        });
-                                })
-                            }, 30 * 1000)
+                                    })
+                                }))
+                                io.to(data.token).emit('updateSendLog', {
+                                    log: logg
+                                });
+                            }, 10 * 1000)
                         });
                         result.rows.forEach(res => {
                             res.intervals = res.intervals.map(inter => {
