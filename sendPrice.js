@@ -31,110 +31,113 @@ async function sendPrices() {
 
         let receivers = await convertDBQueryToArray(queries.getTableQuery3);
 
-        let receiverList = await(convertDBQueryToArray(queries.getReceiverQuery));
+        let receiverList = await (convertDBQueryToArray(queries.getReceiverQuery));
 
-        for (let i in receivers) {
-            let receive = receivers[i];
+        await Promise.all(receivers.map(receive => {
+            return new Promise(async resolve3 => {
 
-            let frequency = 0;
-            if (receive.frequency !== null) {
-                frequency = (receive.frequency.days ? receive.frequency.days * 60 * 1000 * 60 * 24 : 0) +
-                    (receive.frequency.hours ? receive.frequency.hours * 60 * 1000 * 60 : 0) +
-                    (receive.frequency.minutes ? receive.frequency.minutes * 60 * 1000 : 0)
-            }
 
-            if (receive.send_now) {
-                await new Promise(resolve1 => {
-                    let query = {
-                        text: queries.changeTableQuery,
-                        values: [
-                            receive.rule_name,
-                            receive.sender,
-                            receive.subscribe_to_update,
-                            receive.result_name,
-                            receive.in_use,
-                            receive.intervals,
-                            receive.frequency,
-                            receive.title,
-                            receive.region,
-                            receive.groups,
-                            receive.xls,
-                            false,
-                            receive.removed,
-                            receive.id
-                        ]
-                    };
-                    clientPg.query(query)
-                        .then(async () => {
-                            await createAndSendMail(receive, readyFolder, receiverList);
-                            resolve1();
-                        })
-                        .catch(reason => {
-                            console.log(reason);
-                            resolve1();
-                        })
-                })
-            }
+                let frequency = 0;
+                if (receive.frequency !== null) {
+                    frequency = (receive.frequency.days ? receive.frequency.days * 60 * 1000 * 60 * 24 : 0) +
+                        (receive.frequency.hours ? receive.frequency.hours * 60 * 1000 * 60 : 0) +
+                        (receive.frequency.minutes ? receive.frequency.minutes * 60 * 1000 : 0)
+                }
 
-            if (receive.subscribe_to_update) {
-                    let toUpdate = false;
-                await Promise.all(receive.templates_id.map((template) => {
-                    return new Promise(resolve1 => {
-                        clientPg.query({text: queries.getLastUpdate, values: [template]})
-                            .then(async result => {
-                                await Promise.all(result.rows.map(res => {
-                                    return new Promise(resolve2 => {
-                                        if (res.send === null){
-                                            toUpdate = true;
-                                            clientPg.query({text: queries.updateUpdateLog, values: [res.convert_rule, res.date, true]})
-                                                .then(()=>{
-                                                    resolve2();
-                                                })
-                                                .catch(reason => {
-                                                    console.log(reason);
-                                                    resolve2();
-                                                })
-                                        } else resolve2()
-                                    })
-                                }));
-                                resolve1()
+                if (receive.send_now) {
+                    await new Promise(resolve1 => {
+                        let query = {
+                            text: queries.changeTableQuery,
+                            values: [
+                                receive.rule_name,
+                                receive.sender,
+                                receive.subscribe_to_update,
+                                receive.result_name,
+                                receive.in_use,
+                                receive.intervals,
+                                receive.frequency,
+                                receive.title,
+                                receive.region,
+                                receive.groups,
+                                receive.xls,
+                                false,
+                                receive.removed,
+                                receive.id
+                            ]
+                        };
+                        clientPg.query(query)
+                            .then(async () => {
+                                await createAndSendMail(receive, readyFolder, receiverList);
+                                resolve1();
+                            })
+                            .catch(reason => {
+                                console.log(reason);
+                                resolve1();
                             })
                     })
-                }));
+                }
+
+                if (receive.subscribe_to_update) {
+                    let toUpdate = false;
+                    await Promise.all(receive.templates_id.map((template) => {
+                        return new Promise(resolve1 => {
+                            clientPg.query({text: queries.getLastUpdate, values: [template]})
+                                .then(async result => {
+                                    await Promise.all(result.rows.map(res => {
+                                        return new Promise(resolve2 => {
+                                            if (res.send === null) {
+                                                toUpdate = true;
+                                                clientPg.query({text: queries.updateUpdateLog, values: [res.convert_rule, res.date, true]})
+                                                    .then(() => {
+                                                        resolve2();
+                                                    })
+                                                    .catch(reason => {
+                                                        console.log(reason);
+                                                        resolve2();
+                                                    })
+                                            } else resolve2()
+                                        })
+                                    }));
+                                    resolve1()
+                                })
+                        })
+                    }));
                     if (toUpdate) {
                         await createAndSendMail(receive, readyFolder, receiverList);
                     }
 
-            }
-            if ((receive.date === null || Date.parse(receive.date) + (frequency) < Date.now()) && frequency !== 0) {
-                await createAndSendMail(receive, readyFolder, receiverList);
-            } else if (receive.intervals.length > 0) {
-                await Promise.all(receive.intervals.map(async inter => {
-                    return new Promise(async resolve1 => {
-                        let date = new Date();
-                        let dateTime = date.getHours() * 60 * 24 + date.getMinutes() * 60 + date.getSeconds();
-                        let innerTime = inter.getHours() * 60 * 24 + inter.getMinutes() * 60 + inter.getSeconds();
-                        let equal = receive.date === null ? false : date.getDate() === receive.date.getDate();
-                        let lastTime = receive.date === null ? 0 : receive.date.getHours() * 60 * 24 + receive.date.getMinutes() * 60 + receive.date.getSeconds();
+                }
+                if ((receive.date === null || Date.parse(receive.date) + (frequency) < Date.now()) && frequency !== 0) {
+                    await createAndSendMail(receive, readyFolder, receiverList);
+                } else if (receive.intervals.length > 0) {
+                    await Promise.all(receive.intervals.map(async inter => {
+                        return new Promise(async resolve1 => {
+                            let date = new Date();
+                            let dateTime = date.getHours() * 60 * 24 + date.getMinutes() * 60 + date.getSeconds();
+                            let innerTime = inter.getHours() * 60 * 24 + inter.getMinutes() * 60 + inter.getSeconds();
+                            let equal = receive.date === null ? false : date.getDate() === receive.date.getDate();
+                            let lastTime = receive.date === null ? 0 : receive.date.getHours() * 60 * 24 + receive.date.getMinutes() * 60 + receive.date.getSeconds();
 
-                        if (Math.abs(dateTime - innerTime) < 60) {
-                            if (!equal) {
-                                await createAndSendMail(receive, readyFolder, receiverList);
-                                resolve1();
-                            } else if (lastTime - innerTime > 60 * 10) {
-                                await createAndSendMail(receive, readyFolder, receiverList);
-                                resolve1();
+                            if (Math.abs(dateTime - innerTime) < 60) {
+                                if (!equal) {
+                                    await createAndSendMail(receive, readyFolder, receiverList);
+                                    resolve1();
+                                } else if (lastTime - innerTime > 60 * 10) {
+                                    await createAndSendMail(receive, readyFolder, receiverList);
+                                    resolve1();
+                                } else {
+                                    resolve1();
+                                }
+
                             } else {
                                 resolve1();
                             }
-
-                        } else {
-                            resolve1();
-                        }
-                    });
-                }))
-            }
-        }
+                        });
+                    }))
+                }
+                resolve3();
+            })
+        }));
         resolve();
     });
 }
@@ -150,7 +153,7 @@ function convertXlsxToArray(path) {
     })
 }
 
-async function createAndSendMail(receive, readyFolder, receiverList){
+async function createAndSendMail(receive, readyFolder, receiverList) {
     return new Promise(async resolve => {
         var templates = await clientPg.query(queries.getRulesQuery);
         let oldDate = new Date();
@@ -182,18 +185,18 @@ async function createAndSendMail(receive, readyFolder, receiverList){
                         bigXlsx.unshift(receive.header[0]);
                         bigXlsx = await buildXlsx(bigXlsx);
                         attach.push({
-                            filename:receive.result_name +  (receive.xls ? '.xls' : '.xlsx'),
+                            filename: receive.result_name + (receive.xls ? '.xls' : '.xlsx'),
                             content: bigXlsx
                         });
-                        fs.writeFileSync(readyFolder2 + bigName.substring(0, bigName.length - 3) +  (receive.xls ? '.xls' : '.xlsx'), bigXlsx)
+                        fs.writeFileSync(readyFolder2 + bigName.substring(0, bigName.length - 3) + (receive.xls ? '.xls' : '.xlsx'), bigXlsx)
 
                     } else {
                         let template = templates.rows.filter(f => f.id.toString() === g.replace(' ', ''))[0].name;
                         attach.push({
-                            filename: names[counter] +  (receive.xls ? '.xls' : '.xlsx'),
-                            content: fs.readFileSync(readyFolder + template +  '.xlsx')
+                            filename: names[counter] + (receive.xls ? '.xls' : '.xlsx'),
+                            content: fs.readFileSync(readyFolder + template + '.xlsx')
                         });
-                        fs.writeFileSync(readyFolder2 + template +  (receive.xls ? '.xls' : '.xlsx'), fs.readFileSync(readyFolder + template +  '.xlsx'))
+                        fs.writeFileSync(readyFolder2 + template + (receive.xls ? '.xls' : '.xlsx'), fs.readFileSync(readyFolder + template + '.xlsx'))
                     }
                     counter++;
                 });
@@ -201,9 +204,9 @@ async function createAndSendMail(receive, readyFolder, receiverList){
                 await Promise.all(receive.templates.map(async (elem2) => {
                     attach.push({
                         filename: receive.result_name + (receive.xls ? '.xls' : '.xlsx'),
-                        content: fs.readFileSync(readyFolder + elem2 +  '.xlsx')
+                        content: fs.readFileSync(readyFolder + elem2 + '.xlsx')
                     });
-                    fs.writeFileSync(readyFolder2 + elem2 +  (receive.xls ? '.xls' : '.xlsx'), fs.readFileSync(readyFolder + elem2 + '.xlsx'))
+                    fs.writeFileSync(readyFolder2 + elem2 + (receive.xls ? '.xls' : '.xlsx'), fs.readFileSync(readyFolder + elem2 + '.xlsx'))
                 }));
             }
         } catch (e) {
@@ -287,7 +290,7 @@ function buildXlsx(newExcel) {
 }
 
 sendPrices()
-    .then(()=>{
+    .then(() => {
         clientPg.end();
     });
 
