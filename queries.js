@@ -121,6 +121,7 @@ let changeTableQuery = 'UPDATE public.send_rules SET rule_name = $1, sender = $2
 let insertTableQuery = 'INSERT INTO public.send_rules(rule_name, sender, subscribe_to_update, result_name, in_use, intervals, frequency, title, send_now, groups, xls, removed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id';
 
 let getRulesQuery = `SELECT convert_rules.name AS name,
+			    list_name,
                             sender,
                             filter,
                             title_filter,
@@ -137,9 +138,9 @@ let getRulesQuery = `SELECT convert_rules.name AS name,
                        LEFT JOIN headers h on convert_rules.headers = h.id
                      WHERE convert_rules.removed = false`;
 
-let changeRulesQuery = 'UPDATE public.convert_rules SET name = $1, template = $2, sender =$3, filter =$4, title_filter =$5, headers =$6, removed =$7 WHERE id = $8';
+let changeRulesQuery = 'UPDATE public.convert_rules SET name = $1, list_name =$2, template = $3, sender =$4, filter =$5, title_filter =$6, headers =$7, removed =$8 WHERE id = $9';
 
-let insertRulesQuery = 'INSERT INTO public.convert_rules(name, template, sender, filter, title_filter, headers, removed) VALUES ($1, $2, $3, $4, $5, $6, $7)';
+let insertRulesQuery = 'INSERT INTO public.convert_rules(name, list_name, template, sender, filter, title_filter, headers, removed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)';
 
 let getReceiverQuery = 'SELECT * FROM receivers WHERE removed = false';
 

@@ -1,4 +1,4 @@
-const xlsx = require('async-xlsx');//быстрое чтение и запись экселя, возможно этот элемент и не нужен, но теперь уже лучше не трогать
+﻿const xlsx = require('async-xlsx');//быстрое чтение и запись экселя, возможно этот элемент и не нужен, но теперь уже лучше не трогать
 const xlsxConverter = require('xlsx'); //нормальная либа экселя
 const fs = require('fs'); //файлы
 const util = require('util'); //промисы
@@ -104,6 +104,7 @@ async function main() {
     });
 
     let query = `SELECT convert_rules.id,
+			list_name,
                         sender,
                         t.pseudoname  AS outer_name,
                         filter,
@@ -119,7 +120,7 @@ async function main() {
                         LEFT JOIN templates t on convert_rules.template = t.id
                         LEFT JOIN headers h on convert_rules.headers = h.id
                  WHERE convert_rules.removed = false
-                 GROUP BY convert_rules.id, title_filter, pseudoname, filter, sender, template, source, t.filters,
+                 GROUP BY convert_rules.id, list_name, title_filter, pseudoname, filter, sender, template, source, t.filters,
                           h.columns,
                           t.formulas, t.unions
                  ORDER BY convert_rules.id
@@ -146,18 +147,11 @@ async function writeMail(path, data, date, template, id) {
                    WHERE id = $2;`,
             values: [path, id]
         };
-        let queryInsert = {
-            text: `INSERT INTO update_price_log (date, convert_rule)
-                   VALUES ($1, $2)`,
-            values: [date, id]
-        };
+
         clientPg.query(queryUpdate)
             .then(() => {
-                clientPg.query(queryInsert)
-                    .then(() => {
-                        console.log('Найден новый прайс ' + template.filter(t => t.id === id)[0].outer_name + ' на ' + date.toLocaleDateString());
-                        resolve(template)
-                    }, err => console.log(err))
+                 console.log('Найден новый прайс ' + template.filter(t => t.id === id)[0].outer_name + ' на ' + date.toLocaleDateString());
+                 resolve(template)
             }, err => console.log(err))
     });
 }
@@ -177,8 +171,10 @@ async function mailListen(template) {
             .on('mail', async function (mail) {
 
                 console.log(mail.from[0].address.toLowerCase() + ' ' + mail.date.toLocaleString());
+
                 await Promise.all(template.map(async (elem) => {
                     return new Promise(async resolve1 => {
+console.log(elem.last_date)
 
                         if (mail.attachments !== undefined && elem.sender !== null
                             && elem.sender.toLowerCase() === mail.from[0].address.toLowerCase() && (elem.last_date === null ? true : elem.last_date < Date.parse(mail.date))) {
@@ -301,7 +297,7 @@ async function makePrices(template) {
                 };
                 let add_tables = (await clientPg.query(addQuery)).rows;
 
-                await convertFiles(main_file, template[i], add_tables, template[i].outer_name, template[i])
+                await convertFiles(main_file, template[i], add_tables, template[i].outer_name, template[i].list_name, template[i])
 
             } else {
                 console.log('Прайс ' + template[i].outer_name + " не найден.");
@@ -359,50 +355,57 @@ function convertXlsxToArray(path) {
 }
 
 
-function buildXlsx(newExcel, resultName, path) {
+function buildXlsx(newExcel, resultName, listName, path) {
     return new Promise(async resolve => {
 
         if (path.includes('uaz-email')) {
-            let text = `truncate table uaz1_add0;
-            INSERT INTO uaz1_add0 VALUES`;
-            for (let i = 0; i < newExcel.length; i++) {
-                text += '(';
-                for (let j = 0; j < newExcel[i].length; j++) {
-                    if (newExcel[i][j] === undefined || newExcel[i][j] === null || isNaN(newExcel[i][j])) {
-                        text += '' + null + ','
-                    } else if (typeof newExcel[i][j] === 'object') {
-                        text += '\'' + newExcel[i][j].v + '\','
-                    } else if (typeof newExcel[i][j] === 'string') {
-                        text += '\'' + newExcel[i][j] + '\','
-                    } else {
-                        text += '' + newExcel[i][j] + ','
-                    }
-                }
-                text = text.substring(0, text.length - 1) + '),';
-            }
-            text = text.substring(0, text.length - 1) + ';';
-            console.log(text)
-
+            let text = `truncate table uaz1_add0;`
             clientPg.query(text)
-                .then(() => {
-                    xlsx.buildAsync([{
-                        name: "price",
-                        data: newExcel
-                    }], {}, function (error, xlsBuffer) {
-                        if (!error) {
-                            fs.writeFileSync(fs.realpathSync('./ready') + '/' + resultName + '.xlsx', xlsBuffer);
-                            console.log('Прайс ' + resultName + ' записан');
-                            resolve()
+            let counter = 0;
+            while (counter <= newExcel.length - 1) {
+
+                text = `INSERT INTO uaz1_add0
+                        VALUES`;
+                for (let i = counter; i < (counter + 100 > newExcel.length ? newExcel.length : counter + 100); i++) {
+                    counter++;
+                    text += '(';
+                    for (let j = 0; j < newExcel[i].length; j++) {
+                        if (newExcel[i][j] === undefined || newExcel[i][j] === null || isNaN(newExcel[i][j])) {
+                            text += '' + null + ','
+                        } else if (typeof newExcel[i][j] === 'object') {
+                            text += '\'' + newExcel[i][j].v + '\','
+                        } else if (typeof newExcel[i][j] === 'string') {
+                            text += '\'' + newExcel[i][j] + '\','
                         } else {
-                            console.log('Ошибка записи ' + error);
-                            resolve()
+                            text += '' + newExcel[i][j] + ','
                         }
-                    })
-                })
+                    }
+                    text = text.substring(0, text.length - 1) + '),';
+
+                }
+                text = text.substring(0, text.length - 1) + ';';
+                await clientPg.query(text)
+            }
+
+
+            xlsx.buildAsync([{
+                name: listName,
+                data: newExcel
+            }], {}, function (error, xlsBuffer) {
+                if (!error) {
+                    fs.writeFileSync(fs.realpathSync('./ready') + '/' + resultName + '.xlsx', xlsBuffer);
+                    console.log('Прайс ' + resultName + ' записан');
+                    resolve()
+                } else {
+                    console.log('Ошибка записи ' + error);
+                    resolve()
+                }
+            })
+
         } else {
 
             xlsx.buildAsync([{
-                name: "price",
+                name: listName,
                 data: newExcel
             }], {}, function (error, xlsBuffer) {
                 if (!error) {
@@ -419,14 +422,14 @@ function buildXlsx(newExcel, resultName, path) {
 }
 
 
-async function convertFiles(path, template, tables, resultName) {
+async function convertFiles(path, template, tables, resultName, listName) {
     return new Promise(async resolve => {
         path = path.toLowerCase();
         if (path.substring(path.length - 3, path.length) === 'txt') {
 
             let object = await convertTxtToArray(path);
             let ee = await modifyExcel(object, template);
-            await buildXlsx(ee, resultName, path);
+            await buildXlsx(ee, resultName, listName, path);
             resolve();
 
 
@@ -475,7 +478,13 @@ async function convertFiles(path, template, tables, resultName) {
             await Promise.all(tables.map(async (table) => {
                 arrayOfTables.push(table.name)
             }));
-            await buildXlsx(await modifyExcel(object, template, arrayOfTables, resultName), resultName, path);
+            await buildXlsx(await modifyExcel(object, template, arrayOfTables, resultName), resultName, listName, path);
+            let queryInsert = {
+                text: `INSERT INTO update_price_log (date, convert_rule)
+                       VALUES ($1, $2)`,
+                values: [new Date(), template.id]
+            };
+            clientPg.query(queryInsert)
             resolve();
         }
     })
@@ -539,6 +548,19 @@ async function modifyExcel(parsedObject, template, arrayOfTables, resultName) {
                                 }
                             }
                         }
+
+                        if (templateElement.includes('НЕРАВНО')) {
+
+                            let filter = templateElement.substring(templateElement.indexOf('НЕРАВНО(') + ('НЕРАВНО(').length, templateElement.indexOf(')'));
+                            //сама фильтрация, тут все просто
+                            for (let k = 1; k < parsedObject[0].data.length; k++) {
+                                if (('' + parsedObject[0].data[k][j]).toLowerCase() === filter.toLowerCase() ) {
+                                    parsedObject[0].data.splice(k, 1);
+                                    k--
+                                }
+                            }
+                        }
+
 
                         if (template.filters[j].includes('ВКЛЮЧАЕТСИНДЕКСОМ')) {
 
@@ -708,9 +730,9 @@ function gmMakeRequest(template) {
                                 form: {
                                     __EVENTTARGET: 'ctl01',
                                     __EVENTARGUMENT: '',
-                                    __VIEWSTATE: '/wEPDwULLTEzNjQ2MDIxNTAPZBYEZg9kFggCAQ8WAh4JaW5uZXJodG1sBT5HTSBTeXN0ZW0gLSDQodC+0YHRgtC+0Y/QvdC40LUg0YHQutC70LDQtNCwINC30LDQv9GH0LDRgdGC0LXQuWQCAw88KwAFAQMUKwACEBYEHgZJdGVtSUQFFlRvcDFfTWVudTEtbWVudUl0ZW0wMDAeCEl0ZW1UZXh0BQ7QodC40YHRgtC10LzQsBQrAAIQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMC1zdWJNZW51LW1lbnVJdGVtMDAxHwIFF9Ch0LzQtdC90LAg0L/QsNGA0L7Qu9GPHgdJdGVtVVJMBQ9jaGFuZ2VwYXNzLmFzcHhkZBAWBh8BBSpUb3AxX01lbnUxLW1lbnVJdGVtMDAwLXN1Yk1lbnUtbWVudUl0ZW0wMDIfAgUK0JLRi9GF0L7QtB8DBQlleGl0LmFzcHhkZGQQFgQfAQUWVG9wMV9NZW51MS1tZW51SXRlbTAwMR8CBR3QodC60LvQsNC0INC30LDQv9GH0LDRgdGC0LXQuRQrAAQQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMS1zdWJNZW51LW1lbnVJdGVtMDAwHwIFMtCh0L7RgdGC0L7Rj9C90LjQtSDRgdC60LvQsNC00LAg0LfQsNC/0YfQsNGB0YLQtdC5HwMFDGludjMxMHQuYXNweGRkEBYGHwEFKlRvcDFfTWVudTEtbWVudUl0ZW0wMDEtc3ViTWVudS1tZW51SXRlbTAwMR8CBSHQntGC0LvQvtC20LXQvdC90YvQtSDQt9Cw0LrQsNC30YsfAwUMb3JwMTQwdC5hc3B4ZGQQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMS1zdWJNZW51LW1lbnVJdGVtMDAyHwIFG9Ch0YLQsNGC0YPRgSDQt9Cw0LrQsNC30L7Qsh8DBQxzdG0xMTB0LmFzcHhkZBAWBh8BBSpUb3AxX01lbnUxLW1lbnVJdGVtMDAxLXN1Yk1lbnUtbWVudUl0ZW0wMDMfAgUd0JfQsNC60LDQtyDQt9Cw0L/Rh9Cw0YHRgtC10LkfAwULb3JwMTEwLmFzcHhkZGRkAgUPFgIfAAUq0JfQtNGA0LDQstGB0YLQstGD0LnRgtC1IFN2ZXRsYW5hIEtvc2htYXIhZAIHDxYCHgdWaXNpYmxlaGQCAg9kFgJmD2QWAgIHD2QWAmYPFgIfAAVi0J7QsdC90L7QstC70LXQvdC40LUgREFUOiAxOC4xMi4yMDE1IDA0OjIwOjQzPGJyPtCe0LHQvdC+0LLQu9C10L3QuNC1IFNORzogMjMuMDEuMjAxOSAxMzoyODo1OTxicj5kZDeZ0nCJ7JYHC1BgaScT0+E=',
+                                    __VIEWSTATE: '/wEPDwULLTEzNjQ2MDIxNTAPZBYEZg9kFggCAQ8WAh4JaW5uZXJodG1sBT5HTSBTeXN0ZW0gLSDQodC+0YHRgtC+0Y/QvdC40LUg0YHQutC70LDQtNCwINC30LDQv9GH0LDRgdGC0LXQuWQCAw88KwAFAQMUKwACEBYEHgZJdGVtSUQFFlRvcDFfTWVudTEtbWVudUl0ZW0wMDAeCEl0ZW1UZXh0BQ7QodC40YHRgtC10LzQsBQrAAIQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMC1zdWJNZW51LW1lbnVJdGVtMDAxHwIFF9Ch0LzQtdC90LAg0L/QsNGA0L7Qu9GPHgdJdGVtVVJMBQ9jaGFuZ2VwYXNzLmFzcHhkZBAWBh8BBSpUb3AxX01lbnUxLW1lbnVJdGVtMDAwLXN1Yk1lbnUtbWVudUl0ZW0wMDIfAgUK0JLRi9GF0L7QtB8DBQlleGl0LmFzcHhkZGQQFgQfAQUWVG9wMV9NZW51MS1tZW51SXRlbTAwMR8CBR3QodC60LvQsNC0INC30LDQv9GH0LDRgdGC0LXQuRQrAAQQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMS1zdWJNZW51LW1lbnVJdGVtMDAwHwIFMtCh0L7RgdGC0L7Rj9C90LjQtSDRgdC60LvQsNC00LAg0LfQsNC/0YfQsNGB0YLQtdC5HwMFDGludjMxMHQuYXNweGRkEBYGHwEFKlRvcDFfTWVudTEtbWVudUl0ZW0wMDEtc3ViTWVudS1tZW51SXRlbTAwMR8CBSHQntGC0LvQvtC20LXQvdC90YvQtSDQt9Cw0LrQsNC30YsfAwUMb3JwMTQwdC5hc3B4ZGQQFgYfAQUqVG9wMV9NZW51MS1tZW51SXRlbTAwMS1zdWJNZW51LW1lbnVJdGVtMDAyHwIFG9Ch0YLQsNGC0YPRgSDQt9Cw0LrQsNC30L7Qsh8DBQxzdG0xMTB0LmFzcHhkZBAWBh8BBSpUb3AxX01lbnUxLW1lbnVJdGVtMDAxLXN1Yk1lbnUtbWVudUl0ZW0wMDMfAgUd0JfQsNC60LDQtyDQt9Cw0L/Rh9Cw0YHRgtC10LkfAwULb3JwMTEwLmFzcHhkZGRkAgUPFgIfAAUq0JfQtNGA0LDQstGB0YLQstGD0LnRgtC1IFN2ZXRsYW5hIEtvc2htYXIhZAIHDxYCHgdWaXNpYmxlaGQCAg9kFgJmD2QWAgIHD2QWAmYPFgIfAAVi0J7QsdC90L7QstC70LXQvdC40LUgREFUOiAxOC4xMi4yMDE1IDA0OjIwOjQzPGJyPtCe0LHQvdC+0LLQu9C10L3QuNC1IFNORzogMjYuMDQuMjAxOSAwNzoyNzo1ODxicj5kZC7MrQXdtQfehaCLyVLjqaM=',
                                     __VIEWSTATEGENERATOR: 'ACCA6985',
-                                    __EVENTVALIDATION: '/wEdAAWkZZu4SpMvIFRnXbSzYtL1nS6zCR2bqUXJuevSr6A3NiXIFWL+wv45SHU62q4rLobxTrg7s/eG70UIAOod3OxqcWtaTiCzWpv2jfgTJfZJLmn4OSO2uJ+O7zNnpLgP+WU=',
+                                    __EVENTVALIDATION: '/wEdAAXChNkATStwRwmwE8Bh8G1SnS6zCR2bqUXJuevSr6A3NiXIFWL+wv45SHU62q4rLobxTrg7s/eG70UIAOod3OxqcWtaTiCzWpv2jfgTJfZJLrqYqIAezGZwIndkMuCIr5w=',
                                     tMask: '',
                                     hdnMask: ''
                                 },
@@ -727,7 +749,7 @@ function gmMakeRequest(template) {
                                 fs.writeFileSync('./attachments/gm-stock.txt', file);
                                 await Promise.all(template.map(async (elem) => {
                                     /** @namespace elem.outer_name */
-                                    if (elem.outer_name === 'GM') {
+                                    if (elem.outer_name.includes('GM')) {
                                         writeMail('./attachments/gm-stock.txt', undefined, new Date(), template, elem.id);
                                         resolve();
                                     }
@@ -736,10 +758,20 @@ function gmMakeRequest(template) {
                             })
                         } else {
                             console.log('Необходимо обновить пароль к порталу GM!');
-                            clientPg.query({text: 'UPDATE settings SET param = $2 WHERE name = $1', values: ["Блокировка портала", "Да"]}).then(result => {
-                                resolve();
-                            });
-
+                            req.post('https://gm-system.ru/logon.aspx?ReturnUrl=%2finv310t.aspx', {
+                                form: {
+                                    __VIEWSTATE: '/wEPDwUKMTQ4NDQ4Mzg5OA9kFgICAQ9kFgICBQ8WBB4IZGlzYWJsZWRkHgdWaXNpYmxlZ2RkJYnr25q2Le7GCkMzeAxPtQ==',
+                                    __EVENTVALIDATION: '/wEdAATPNFOBfaFoumntiQHVWjTWY3plgk0YBAefRz3MyBlTcHY2+Mc6SrnAqio3oCKbxYa/Ddi58i/dsQ6aLnYJIUBmP9QJB9H8R/JbGT6I/xJqEQ==',
+                                    txtUserName: result.rows.filter(row => row.name === 'Логин на портал')[0].param,
+                                    txtPassword: result.rows.filter(row => row.name === 'Пароль на портал')[0].param
+                                }
+                            }).on('response', (response) => {
+                                if (response.headers["set-cookie"] && response.headers["set-cookie"].length <= 1) {
+                                    clientPg.query({text: 'UPDATE settings SET param = $2 WHERE name = $1', values: ["Блокировка портала", "Да"]}).then(result => {
+                                        resolve();
+                                    });
+                                }
+                            })
                         }
                     })
                 })

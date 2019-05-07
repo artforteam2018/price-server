@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const {Client} = require('pg');
@@ -49,10 +49,10 @@ setInterval(() => {
     exec('node sendPrice.js',
         function (error, stdout) {
             console.log('stdout: ' + stdout);
-            if (error !== null) {
-                console.log('exec error: ' + error);
-            }
-        });
+           if (error !== null) {
+               console.log('exec error: ' + error);
+           }
+       });
 }, 15000);
 
 let backInterval = () => {
@@ -95,6 +95,21 @@ app.get('/getConvertRulesComp', (req, res) => {
                     res.send(result.rows)
                 })
                 .catch(reason => console.log(reason))
+        })
+});
+
+app.get('/updatePrices', (req, res) => {
+    checkToken(req)
+        .then(() => {
+
+                console.log('Формирование прайсов');
+    exec('node old-back.js',
+        function (error, stdout) {
+            console.log('stdout: ' + stdout);
+            if (error !== null) {
+                console.log('exec error: ' + error);
+            }
+        });
         })
 });
 
@@ -334,7 +349,7 @@ app.post('/changeTemplates', (req, res) => {
                                 if (JSON.stringify(oldRule[0]) !== JSON.stringify(rule)) {
                                     let query = {
                                         text: queries.changeRulesQuery,
-                                        values: [rule.name, rule.template, rule.sender, rule.filter, rule['title_filter'], rule.headers, rule.removed, rule.id]
+                                        values: [rule.name, rule.list_name, rule.template, rule.sender, rule.filter, rule['title_filter'], rule.headers, rule.removed, rule.id]
                                     };
                                     await clientPg.query({text: 'delete from rules_tables where convert_rule = $1', values: [rule.id]});
                                     rule.add_tables_id.forEach(async add => {
@@ -357,7 +372,7 @@ app.post('/changeTemplates', (req, res) => {
                             } else {
                                 let query = {
                                     text: queries.insertRulesQuery,
-                                    values: [rule.name, rule.template, rule.sender, rule.filter, rule['title_filter'], rule.headers, false]
+                                    values: [rule.name, rule.list_name, rule.template, rule.sender, rule.filter, rule['title_filter'], rule.headers, false]
                                 };
                                 clientPg.query(query)
                                     .then(() => {

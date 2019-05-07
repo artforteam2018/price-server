@@ -1,5 +1,6 @@
-let xlsx = require('async-xlsx');
+﻿let xlsx = require('async-xlsx');
 let fs = require('fs');
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 let JSZip = require('jszip');
 const {Client} = require('pg'); //работа с бд
 const queries = require('./queries');
@@ -78,6 +79,7 @@ async function sendPrices() {
                 }
 
                 if (receive.subscribe_to_update) {
+console.log('send for update');
                     let toUpdate = false;
                     await Promise.all(receive.templates_id.map((template) => {
                         return new Promise(resolve1 => {
@@ -107,22 +109,26 @@ async function sendPrices() {
                     }
 
                 }
-                if ((receive.date === null || Date.parse(receive.date) + (frequency) < Date.now()) && frequency !== 0) {
+
+                if ((receive.date === null || Date.parse(receive.date) + (frequency) < Date.now()) && frequency !== 0 && frequency !== '' && receive.intervals.length <= 0) {
                     await createAndSendMail(receive, readyFolder, receiverList);
                 } else if (receive.intervals.length > 0) {
                     await Promise.all(receive.intervals.map(async inter => {
                         return new Promise(async resolve1 => {
                             let date = new Date();
-                            let dateTime = date.getHours() * 60 * 24 + date.getMinutes() * 60 + date.getSeconds();
-                            let innerTime = inter.getHours() * 60 * 24 + inter.getMinutes() * 60 + inter.getSeconds();
+                            let dateTime = date.getHours() * 60 * 60 + date.getMinutes() * 60 + date.getSeconds();
+                            let innerTime = inter.getHours() * 60 * 60 + inter.getMinutes() * 60 + inter.getSeconds();
                             let equal = receive.date === null ? false : date.getDate() === receive.date.getDate();
-                            let lastTime = receive.date === null ? 0 : receive.date.getHours() * 60 * 24 + receive.date.getMinutes() * 60 + receive.date.getSeconds();
+                            let lastTime = receive.date === null ? 0 : receive.date.getHours() * 60 * 60 + receive.date.getMinutes() * 60 + receive.date.getSeconds();
 
+			
                             if (Math.abs(dateTime - innerTime) < 60) {
                                 if (!equal) {
+
                                     await createAndSendMail(receive, readyFolder, receiverList);
                                     resolve1();
-                                } else if (lastTime - innerTime > 60 * 10) {
+                                } else if (Math.abs(lastTime - innerTime) > 120) {
+
                                     await createAndSendMail(receive, readyFolder, receiverList);
                                     resolve1();
                                 } else {
@@ -226,13 +232,14 @@ async function createAndSendMail(receive, readyFolder, receiverList) {
         const mailTransport = require('nodemailer').createTransport({
             host: result.rows[0].host,
             port: result.rows[0].port,
-            secure: true,
+            secure: result.rows[0].port == 465 ? true : false,
             auth: {
                 user: result.rows[0].email,
                 pass: result.rows[0].password
             }
         });
-        receiversList.map(r => {
+        await Promise.all(receiversList.map(r => {
+            return new Promise(resolve1 => {
 
             let mailOptions = {
                 from: result.rows[0].email, // sender address
@@ -245,14 +252,14 @@ async function createAndSendMail(receive, readyFolder, receiverList) {
                 if (error) {
                     clientPg.query({
                         text: queries.changeSendLog,
-                        values: [receive.id, new Date(), 'error', error, oldDate]
+                        values: [receive.id, new Date(), 'error', error + '//' + info, oldDate]
                     })
                         .then(() => {
-                            resolve();
+                            resolve1();
                         })
                         .catch(reason => {
                             console.log(reason);
-                            resolve();
+                            resolve1();
                         });
                 } else {
                     clientPg.query({
@@ -261,16 +268,17 @@ async function createAndSendMail(receive, readyFolder, receiverList) {
                     })
                         .then(() => {
                             console.log("прайс сформирован и отослан на " + receive.receivers);
-                            resolve();
+                            resolve1();
                         })
                         .catch(reason => {
                             console.log(reason);
-                            resolve();
+                            resolve1();
                         });
                 }
             });
-
-        });
+            })
+        }));
+        resolve();
     });
 }
 
