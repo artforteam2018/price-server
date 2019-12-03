@@ -1,4 +1,4 @@
-# Logs
+﻿# Logs
 logs
 *.log
 npm-debug.log*
@@ -69,3 +69,5 @@ typings/
 .idea/workspace.xml
 temp.xlsx
 yarn.lock
+ready — копия/
+1/

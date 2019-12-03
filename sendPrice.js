@@ -12,7 +12,7 @@ const clientPg = new Client({
     database: 'II'
 });
 const readyFolder2 = fs.realpathSync('./ready2') + '/';
-clientPg.connect(null, null);
+
 
 function convertDBQueryToArray(query) {
     return new Promise(resolve => {
@@ -28,6 +28,7 @@ function convertDBQueryToArray(query) {
 
 async function sendPrices() {
     return new Promise(async resolve => {
+        clientPg.connect(null, null);
         let readyFolder = fs.realpathSync('./ready') + '/';
 
         let receivers = await convertDBQueryToArray(queries.getTableQuery3);
@@ -36,7 +37,6 @@ async function sendPrices() {
 
         await Promise.all(receivers.map(receive => {
             return new Promise(async resolve3 => {
-
 
                 let frequency = 0;
                 if (receive.frequency !== null) {
@@ -58,6 +58,7 @@ async function sendPrices() {
                                 receive.intervals,
                                 receive.frequency,
                                 receive.title,
+                                receive.text,
                                 receive.region,
                                 receive.groups,
                                 receive.xls,
@@ -171,16 +172,19 @@ async function createAndSendMail(receive, readyFolder, receiverList) {
         let attach = [];
         try {
             if (receive.groups !== '') {
+                console.log(receive.result_name)
                 let names = receive.result_name.split('; ');
                 let counter = 0;
-                receive.groups.split(', ').map(async g => {
+                await Promise.all(receive.groups.split(', ').map(async g => {
+                    return new Promise(async resolve33 => {
                     let bigXlsx = [];
                     let bigName = '';
                     if (g.split(';').length > 1) {
-
+			let list_name = 'price';
                         await Promise.all(g.split('; ').map(async gg => {
                             return new Promise(async resolve1 => {
-                                let template = templates.rows.filter(f => f.id.toString() === gg)[0].name;
+                                let template = templates.rows.filter(f => f.id.toString() === gg)[0].id + '_' + templates.rows.filter(f => f.id.toString() === gg)[0].pseudoname;		
+                                list_name = templates.rows.filter(f => f.id.toString() === gg)[0].list_name;
                                 let xlsx = await convertXlsxToArray(readyFolder + template + '.xlsx');
                                 bigXlsx = bigXlsx.concat(xlsx[0].data);
                                 bigName += template + ' + ';
@@ -189,7 +193,7 @@ async function createAndSendMail(receive, readyFolder, receiverList) {
                         }));
                         bigXlsx = bigXlsx.filter(r => r[0] !== receive.header[0][0]);
                         bigXlsx.unshift(receive.header[0]);
-                        bigXlsx = await buildXlsx(bigXlsx);
+                        bigXlsx = await buildXlsx(bigXlsx, list_name);
                         attach.push({
                             filename: receive.result_name + (receive.xls ? '.xls' : '.xlsx'),
                             content: bigXlsx
@@ -197,15 +201,33 @@ async function createAndSendMail(receive, readyFolder, receiverList) {
                         fs.writeFileSync(readyFolder2 + bigName.substring(0, bigName.length - 3) + (receive.xls ? '.xls' : '.xlsx'), bigXlsx)
 
                     } else {
-                        let template = templates.rows.filter(f => f.id.toString() === g.replace(' ', ''))[0].name;
-                        attach.push({
-                            filename: names[counter] + (receive.xls ? '.xls' : '.xlsx'),
-                            content: fs.readFileSync(readyFolder + template + '.xlsx')
-                        });
-                        fs.writeFileSync(readyFolder2 + template + (receive.xls ? '.xls' : '.xlsx'), fs.readFileSync(readyFolder + template + '.xlsx'))
+                        let bigXlsx = [];
+                        let bigName = '';
+                        if (receive.xls) {
+                            let template = templates.rows.filter(f => f.id.toString() === g)[0].id + '_' + templates.rows.filter(f => f.id.toString() === g)[0].pseudoname;                         
+                            let xlsx = await convertXlsxToArray(readyFolder + template + '.xlsx');
+                            bigXlsx = bigXlsx.concat(xlsx[0].data);
+                            bigName = template;
+                            bigXlsx = await buildXlsx(bigXlsx,  templates.rows.filter(f => f.id.toString() === g)[0].list_name);
+                            attach.push({
+                                filename: receive.result_name + (receive.xls ? '.xls' : '.xlsx'),
+                                content: bigXlsx
+                            });
+                            fs.writeFileSync(readyFolder2 + bigName + (receive.xls ? '.xls' : '.xlsx'), bigXlsx)
+                        } else {
+
+                            let template = templates.rows.filter(f => f.id.toString() === g)[0].id + '_' + templates.rows.filter(f => f.id.toString() === g.replace(' ', ''))[0].pseudoname;                           
+attach.push({
+                                filename: names[counter] + (receive.xls ? '.xls' : '.xlsx'),
+                                content: fs.readFileSync(readyFolder + template + '.xlsx')
+                            });
+                            fs.writeFileSync(readyFolder2 + template + (receive.xls ? '.xls' : '.xlsx'), fs.readFileSync(readyFolder + template + '.xlsx'))
+                        }
                     }
                     counter++;
-                });
+		    resolve33();
+                    });
+                }));
             } else {
                 await Promise.all(receive.templates.map(async (elem2) => {
                     attach.push({
@@ -245,7 +267,7 @@ async function createAndSendMail(receive, readyFolder, receiverList) {
                 from: result.rows[0].email, // sender address
                 to: r.email, // list of receivers
                 subject: receive.title, // Subject line
-                text: '', // plain text body
+                text: receive.text, // plain text body
                 attachments: attach
             };
             mailTransport.sendMail(mailOptions, (error, info) => {
@@ -282,10 +304,10 @@ async function createAndSendMail(receive, readyFolder, receiverList) {
     });
 }
 
-function buildXlsx(newExcel) {
+function buildXlsx(newExcel, list_name) {
     return new Promise(async resolve => {
         xlsx.buildAsync([{
-            name: "price",
+            name: list_name,
             data: newExcel
         }], {}, function (error, xlsBuffer) {
             if (!error) {

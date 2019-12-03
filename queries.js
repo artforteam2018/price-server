@@ -7,6 +7,7 @@ let getTableQuery = `SELECT rule_name,
                             intervals,
                             frequency,
                             title,
+                            text,
                             region,
                             groups,
                            xls,
@@ -38,7 +39,7 @@ let getTableQuery = `SELECT rule_name,
                                                            send_price_log.send_rule = send_price_log_inner_1.send_rule
                      ) send_price_log_inner_2 ON send_price_log_inner_2.send_rule = id
                      WHERE removed = false AND (region = ANY($1) OR region isnull)
-                     GROUP BY rule_name, sender, id, subscribe_to_update, result_name, in_use, intervals, frequency, title, removed`;
+                     GROUP BY rule_name, sender, id, subscribe_to_update, result_name, in_use, intervals, frequency, title, text, removed`;
 
 let getTableQuery2 = `SELECT rule_name,
                             sender,
@@ -49,6 +50,7 @@ let getTableQuery2 = `SELECT rule_name,
                             intervals,
                             frequency,
                             title,
+                            text,
                             region,
                              groups,
                              xls,
@@ -85,6 +87,7 @@ let getTableQuery3 = `SELECT rule_name,
                              intervals,
                              frequency,
                              title,
+                             text,
                              region,
                              groups,
        xls,
@@ -116,17 +119,18 @@ let getTableQuery3 = `SELECT rule_name,
                       WHERE removed = false
 `;
 
-let changeTableQuery = 'UPDATE public.send_rules SET rule_name = $1, sender = $2, subscribe_to_update =$3, result_name =$4, in_use =$5, intervals =$6, frequency =$7, title =$8, region =$9, groups = $10, xls = $11, send_now =$12, removed =$13 WHERE id = $14';
+let changeTableQuery = 'UPDATE public.send_rules SET rule_name = $1, sender = $2, subscribe_to_update =$3, result_name =$4, in_use =$5, intervals =$6, frequency =$7, title =$8, text =$9, region =$10, groups = $11, xls = $12, send_now =$13, removed =$14 WHERE id = $15';
 
-let insertTableQuery = 'INSERT INTO public.send_rules(rule_name, sender, subscribe_to_update, result_name, in_use, intervals, frequency, title, send_now, groups, xls, removed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id';
+let insertTableQuery = 'INSERT INTO public.send_rules(rule_name, sender, subscribe_to_update, result_name, in_use, intervals, frequency, title, text, send_now, groups, xls, removed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id';
 
 let getRulesQuery = `SELECT convert_rules.name AS name,
 			    list_name,
                             sender,
                             filter,
                             title_filter,
-                            convert_rules.id,
+                            convert_rules.id AS id,
                             t.id AS template,
+                            t.pseudoname AS pseudoname,
                             h.id AS headers,
                             convert_rules.removed,
                             convert_rules.name,
