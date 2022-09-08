@@ -10,7 +10,7 @@
     "eml-format": "^0.5.0",
     "express": "^4.16.4",
     "js-sha512": "^0.8.0",
-    "jszip": "^3.1.5",
+    "jszip": "^3.7.0",
     "mail-notifier": "^0.5.0",
     "nodemailer": "^5.1.1",
     "pg": "^7.7.1",
